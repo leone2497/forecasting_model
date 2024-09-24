@@ -7,7 +7,6 @@ from glob import glob
 from PIL import Image
 
 st.title("Modello forecast degli assetti di centrale to be")
-st.sidebar.title("Functions")
 file_to_analyze = st.file_uploader("Choose a CSV or Excel file", type=["csv", "xls", "xlsx"])
 
 if file_to_analyze is not None:
