@@ -17,5 +17,5 @@ if file_to_analyze is not None:
   else:
     df = pd.read_excel(file_to_analyze)
     st.write(df.columns.tolist())
-        st.write(df)
+    st.write(df)
 
