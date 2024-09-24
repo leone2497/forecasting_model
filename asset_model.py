@@ -36,8 +36,8 @@ if file_to_analyze is not None:
 
     if machine_columns:
         # Group selected columns into sets of three
-        for i in range(0, len(machine_columns), 3):
-            group = machine_columns[i:i + 3]  # Get the current group of three columns
+        for i in range(0, len(machine_columns), 4):
+            group = machine_columns[i:i + 4]  # Get the current group of three columns
             
             # Create a DataFrame for this group
             if all(col in df.columns for col in group):  # Check if all columns exist in df
