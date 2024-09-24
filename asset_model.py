@@ -13,9 +13,11 @@ file_to_analyze = st.file_uploader("Choose a CSV or Excel file", type=["csv", "x
 
 if file_to_analyze is not None:
   if file_to_analyze.name.endswith('.csv'):
-  df = pd.read_csv(file_to_analyze)
+    df = pd.read_csv(file_to_analyze)
   else:
     df = pd.read_excel(file_to_analyze)
     st.write(df.columns.tolist())
     st.write(df)
+    hours_data= st.sidebar.selectbox("Indicate the power column", df.columns.tolist())
+    
 
