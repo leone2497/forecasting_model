@@ -1,0 +1,9 @@
+pandas
+streamlit
+easyocr
+numpy
+Pillow
+openpyxl
+seaborn
+streamlit-dynamic-filters
+matplotlib
