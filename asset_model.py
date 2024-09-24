@@ -19,7 +19,7 @@ if file_to_analyze is not None:
     st.write(df)
     hours_data= st.sidebar.selectbox("Indicate the power column", df.columns.tolist())
     time_column= st.sidebar.selectbox("Indicate the date time column", df.columns.tolist())
-    machine_columns = st.multiselect("Select machine columns", df.columns)
+    machine_columns = st.sidebar.multiselect("Select machine columns", df.columns)
     if machine_columns:
       for machine_col in machine_columns:
         power_col = f"{machine_col}_power" if f"{machine_col}_power" in df.columns else None
