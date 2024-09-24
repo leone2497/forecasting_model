@@ -16,4 +16,6 @@ if file_to_analyze is not None:
   df = pd.read_csv(file_to_analyze)
   else:
     df = pd.read_excel(file_to_analyze)
+    st.write(df.columns.tolist())
+        st.write(df)
 
