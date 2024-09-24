@@ -19,5 +19,7 @@ if file_to_analyze is not None:
     st.write(df.columns.tolist())
     st.write(df)
     hours_data= st.sidebar.selectbox("Indicate the power column", df.columns.tolist())
-    
+    time_column= st.sidebar.selectbox("Indicate the power column", df.columns.tolist())
+    for column in df.columns.tolist():
+      
 
