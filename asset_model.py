@@ -35,17 +35,19 @@ if file_to_analyze is not None:
     machine_dfs = {}
 
     if machine_columns:
-        for machine_col in machine_columns:
-            # Create a power column name based on the selected machine column
-            power_col = f"{machine_col}_power" if f"{machine_col}_power" in df.columns else None
+        # Group selected columns into sets of three
+        for i in range(0, len(machine_columns), 3):
+            group = machine_columns[i:i + 3]  # Get the current group of three columns
             
-            # Create DataFrame for the machine and its power column (if exists)
-            if power_col:
-                machine_dfs[machine_col] = df[[machine_col, power_col]]
-                st.write(f"Data for machine: {machine_col} and power: {power_col}")
+            # Create a DataFrame for this group
+            if all(col in df.columns for col in group):  # Check if all columns exist in df
+                group_df = df[group]
+                dataframes.append(group_df)
+                
+                # Display the DataFrame for the current group
+                st.write(f"DataFrame for columns: {group}")
+                st.dataframe(group_df)
             else:
-                machine_dfs[machine_col] = df[[machine_col]]
-                st.write(f"Data for machine: {machine_col} (no power column found)")
-
+                st.warning(f"Some columns in the group {group} do not exist in the DataFrame.")
             # Display the created DataFrame
             st.dataframe(machine_dfs[machine_col])
