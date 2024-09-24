@@ -31,8 +31,8 @@ if file_to_analyze is not None:
     # Allow users to select machine columns
     machine_columns = st.multiselect("Select machine columns", df.columns)
 
-    # Initialize dictionary to store DataFrames
-    machine_dfs = {}
+    # Initialize a list to store DataFrames for groups of three
+    dataframes = []
 
     if machine_columns:
         # Group selected columns into sets of three
@@ -49,5 +49,3 @@ if file_to_analyze is not None:
                 st.dataframe(group_df)
             else:
                 st.warning(f"Some columns in the group {group} do not exist in the DataFrame.")
-            # Display the created DataFrame
-            st.dataframe(machine_dfs[machine_col])
