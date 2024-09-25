@@ -29,28 +29,28 @@ if file_to_analyze is not None:
     time_column = st.sidebar.selectbox("Indicate the date time column", df.columns.tolist())
 
     # Input for number of machines
-                n_rows = st.number_input(f"Enter number of machines for group {group_index+1}", min_value=1, key=f"n_rows_{group_index}")
+    n_rows = st.number_input(f"Enter number of machines for group {group_index+1}", min_value=1, key=f"n_rows_{group_index}")
 
                 # Initialize the input array for machine names and sizes
-                input_array = []
+    input_array = []
                 
                 # Generate the grid: left column for text, right column for numbers
-                for j in range(int(n_rows)):
-                    col1, col2 = st.columns(2)  # Create two columns
-                    with col1:
-                        text_input = st.text_input(f"Machine input {j+1} for group {group_index+1}", key=f"machine_text_{group_index}_{j}")
-                    with col2:
-                        num_input = st.number_input(f"Size input {j+1} for group {group_index+1}", key=f"machine_num_{group_index}_{j}")
+    for j in range(int(n_rows)):
+        col1, col2 = st.columns(2)  # Create two columns
+    with col1:
+        text_input = st.text_input(f"Machine input {j+1} for group {group_index+1}", key=f"machine_text_{group_index}_{j}")
+    with col2:
+        num_input = st.number_input(f"Size input {j+1} for group {group_index+1}", key=f"machine_num_{group_index}_{j}")
                     
                     # Store the inputs as a tuple in the array
-                    input_array.append((text_input, num_input))
+    input_array.append((text_input, num_input))
                 
                 # Create a DataFrame for the machine inputs
-                machine_df = pd.DataFrame(input_array, columns=['Machine', 'Size'])
+    machine_df = pd.DataFrame(input_array, columns=['Machine', 'Size'])
                 
                 # Display the DataFrame of machines and sizes
-                st.write("Machine DataFrame:")
-                st.dataframe(machine_df)
+    st.write("Machine DataFrame:")
+    st.dataframe(machine_df)
     
     # Allow users to select machine columns
     machine_columns = st.multiselect("Select machine columns", df.columns)
