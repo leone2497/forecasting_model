@@ -78,7 +78,7 @@ if file_to_analyze is not None:
     dataframes = []
     
     if machine_columns:
-        for  i in enumerate(range(0, len(machine_columns), 4)):
+        for  j,i in enumerate(range(0, len(machine_columns), 4)):
             group = machine_columns[i:i + 4]  # Get the current group of up to 4 columns
             
             if all(col in df.columns for col in group):  # Check if all columns exist in df
