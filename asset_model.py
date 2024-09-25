@@ -69,26 +69,7 @@ ELCO_df = pd.DataFrame(elco_array, columns=['Machine', 'Size'])
 st.write("ELCO DataFrame:")
 st.dataframe(ELCO_df)
 
-# Step 3: Handle merging of TC and ELCO DataFrames
-dataframes_dict = {
-    "TC": TC_df,
-    "ELCO": ELCO_df,
-}
 
-selected_dfs = st.multiselect("Select DataFrames to merge", list(dataframes_dict.keys()))
-
-if selected_dfs:
-    # Concatenate the selected DataFrames
-    dfs_to_concat = [dataframes_dict[df] for df in selected_dfs]
-    merged_df = pd.concat(dfs_to_concat, ignore_index=True)
-    
-    # Display the merged DataFrame
-    st.write("Merged DataFrame:")
-    st.dataframe(merged_df)
-
-    # Optionally, provide a download button for the merged DataFrame
-    csv = merged_df.to_csv(index=False)
-    st.download_button(label="Download Merged CSV", data=csv, file_name='merged_data.csv', mime='text/csv')
 
 # Step 4: Handle selection of columns from the uploaded file (df)
 if file_to_analyze is not None:
