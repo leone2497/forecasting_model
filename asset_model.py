@@ -27,28 +27,8 @@ if file_to_analyze is not None:
     # Sidebar selections for power and date-time columns
     hours_data = st.sidebar.selectbox("Indicate the power column", df.columns.tolist())
     time_column = st.sidebar.selectbox("Indicate the date time column", df.columns.tolist())
-    
-    # Allow users to select machine columns
-    machine_columns = st.multiselect("Select machine columns", df.columns)
 
-    # Initialize a list to store DataFrames for groups of three
-    dataframes = []
-
-    if machine_columns:
-        # Group selected columns into sets of four
-        for group_index, i in enumerate(range(0, len(machine_columns), 4)):
-            group = machine_columns[i:i + 4]  # Get the current group of columns
-            
-            # Create a DataFrame for this group
-            if all(col in df.columns for col in group):  # Check if all columns exist in df
-                group_df = df[group]
-                dataframes.append(group_df)
-                
-                # Display the DataFrame for the current group
-                st.write(f"DataFrame for columns: {group}")
-                st.dataframe(group_df)
-                
-                # Input for number of machines
+    # Input for number of machines
                 n_rows = st.number_input(f"Enter number of machines for group {group_index+1}", min_value=1, key=f"n_rows_{group_index}")
 
                 # Initialize the input array for machine names and sizes
@@ -71,6 +51,28 @@ if file_to_analyze is not None:
                 # Display the DataFrame of machines and sizes
                 st.write("Machine DataFrame:")
                 st.dataframe(machine_df)
+    
+    # Allow users to select machine columns
+    machine_columns = st.multiselect("Select machine columns", df.columns)
+
+    # Initialize a list to store DataFrames for groups of three
+    dataframes = []
+
+    if machine_columns:
+        # Group selected columns into sets of four
+        for group_index, i in enumerate(range(0, len(machine_columns), 4)):
+            group = machine_columns[i:i + 4]  # Get the current group of columns
+            
+            # Create a DataFrame for this group
+            if all(col in df.columns for col in group):  # Check if all columns exist in df
+                group_df = df[group]
+                dataframes.append(group_df)
+                
+                # Display the DataFrame for the current group
+                st.write(f"DataFrame for columns: {group}")
+                st.dataframe(group_df)
+                
+                
                 
             else:
                 st.warning(f"Some columns in the group {group} do not exist in the DataFrame.")
