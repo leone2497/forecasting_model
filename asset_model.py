@@ -1,23 +1,118 @@
-for merge_idx in range(int(num_merged_dfs)):
-    st.write(f"### Merged Database {merge_idx + 1}")
-    selected_dfs = st.multiselect(f"Select DataFrames to merge for Merged Database {merge_idx + 1}", options=range(len(dataframes)), format_func=lambda x: f"Group {x + 1}")
+import pandas as pd
+import streamlit as st
+
+# Set up the Streamlit app
+st.title("Modello forecast degli assetti di centrale to be")
+st.sidebar.title("Functions")
+
+# Step 1: File uploader for CSV or Excel files
+file_to_analyze = st.file_uploader("Choose a CSV or Excel file", type=["csv", "xls", "xlsx"])
+
+if file_to_analyze is not None:
+    try:
+        # Read the uploaded file into a DataFrame
+        if file_to_analyze.name.endswith('.csv'):
+            df = pd.read_csv(file_to_analyze)
+        else:
+            df = pd.read_excel(file_to_analyze, engine="openpyxl")
+        
+        # Display available columns and the DataFrame
+        st.write("Available columns:", df.columns.tolist())
+        st.write("Preview of DataFrame:")
+        st.dataframe(df.head())
     
-    if selected_dfs:
-        # Get the DataFrames to merge
-        dfs_to_merge = [dataframes[i] for i in selected_dfs]
-        merged_df = pd.concat(dfs_to_merge, ignore_index=True)
-        
-        # Display the merged DataFrame
-        st.write(f"Merged DataFrame {merge_idx + 1}:")
-        st.dataframe(merged_df)
-        
-        # Assuming the 2nd and 3rd columns in the merged DataFrame contain the necessary data
-        # Adjust the column indices/names based on your DataFrame structure
-        if merged_df.shape[1] >= 3:  # Ensure there are at least 3 columns in the merged DF
-            merged_df["Rapporto potenza assorbita/pot tot"] = merged_df.iloc[:, 1] / merged_df.iloc[:, 2]
-        
-        st.write(f"DataFrame {merge_idx + 1} with 'Rapporto potenza assorbita/pot tot' column:")
-        st.dataframe(merged_df)
-        
-        # Append the merged DataFrame to the list
-        merged_dataframes.append(merged_df)
+    except Exception as e:
+        st.error(f"Error reading the file: {e}")
+ # Sidebar selections for power and date-time columns
+hours_data = st.sidebar.selectbox("Indicate the power column", df.columns.tolist())
+time_column = st.sidebar.selectbox("Indicate the date time column", df.columns.tolist())
+# Step 2: Handle user input for TC and ELCO data entry
+st.sidebar.write("Enter TC and ELCO Data:")
+
+# Input for number of machines (TC and ELCO)
+n_tc = st.number_input("Enter number of TC", min_value=1)
+n_elco = st.number_input("Enter number of ELCO", min_value=1)
+
+# TC Data entry
+tc_data = []
+for i in range(int(n_tc)):
+    col1, col2 = st.columns(2)
+    with col1:
+        tc_name = st.text_input(f"TC {i + 1} Name")
+    with col2:
+        tc_size = st.number_input(f"TC {i + 1} Size", min_value=0)
+    if tc_name and tc_size:
+        tc_data.append((tc_name, tc_size))
+
+TC_df = pd.DataFrame(tc_data, columns=['Machine', 'Size'])
+st.write("TC DataFrame:")
+st.dataframe(TC_df)
+
+# ELCO Data entry
+elco_data = []
+for i in range(int(n_elco)):
+    col1, col2 = st.columns(2)
+    with col1:
+        elco_name = st.text_input(f"ELCO {i + 1} Name")
+    with col2:
+        elco_size = st.number_input(f"ELCO {i + 1} Size", min_value=0)
+    if elco_name and elco_size:
+        elco_data.append((elco_name, elco_size))
+
+ELCO_df = pd.DataFrame(elco_data, columns=['Machine', 'Size'])
+st.write("ELCO DataFrame:")
+st.dataframe(ELCO_df)
+
+# Step 4: Select machine columns from the uploaded file
+if file_to_analyze is not None:
+    machine_columns = st.multiselect("Select machine columns", df.columns)
+    dataframes = []
+
+    # Group columns into sets of up to 4 and allow renaming
+    if machine_columns:
+        for i in range(0, len(machine_columns), 4):
+            group = machine_columns[i:i + 4]
+            if all(col in df.columns for col in group):
+                group_df = df[group].copy()
+                renamed_columns = [st.text_input(f"Rename column {col}:", value=col) for col in group]
+                group_df.columns = renamed_columns
+                dataframes.append(group_df)
+
+                st.write(f"DataFrame for renamed columns: {renamed_columns}")
+                st.dataframe(group_df)
+            else:
+                st.warning(f"Some columns in the group {group} do not exist in the DataFrame.")
+
+# Step 5: Input for number of merged DataFrames to create
+if dataframes:
+    num_merged_dfs = st.number_input("How many merged databases do you want to create?", min_value=1, max_value=len(dataframes))
+    merged_dataframes = []
+
+    # Loop through user input to merge DataFrames
+    for merge_idx in range(int(num_merged_dfs)):
+        st.write(f"### Merged Database {merge_idx + 1}")
+        selected_dfs = st.multiselect(f"Select DataFrames to merge for Merged Database {merge_idx + 1}",
+                                      options=range(len(dataframes)),
+                                      format_func=lambda x: f"Group {x + 1}")
+
+        if selected_dfs:
+            dfs_to_merge = [dataframes[i] for i in selected_dfs]
+            merged_df = pd.concat(dfs_to_merge, ignore_index=True)
+
+            # Calculate 'Rapporto potenza assorbita/pot tot' if applicable (based on 2nd and 3rd columns)
+            if merged_df.shape[1] >= 3:
+                merged_df["Rapporto potenza assorbita/pot tot"] = merged_df.iloc[:, 1] / merged_df.iloc[:, 2]
+
+            # Display the merged DataFrame
+            st.write(f"Merged DataFrame {merge_idx + 1}:")
+            st.dataframe(merged_df)
+
+            merged_dataframes.append(merged_df)
+
+    # Step 6: Option to download each merged DataFrame as CSV
+    for idx, merged_df in enumerate(merged_dataframes):
+        csv = merged_df.to_csv(index=False)
+        st.download_button(label=f"Download Merged CSV {idx + 1}",
+                           data=csv,
+                           file_name=f'merged_data_{idx + 1}.csv',
+                           mime='text/csv')
