@@ -77,13 +77,16 @@ if file_to_analyze is not None:
             else:
                 st.warning(f"Some columns in the group {group} do not exist in the DataFrame.")
     
+    # Input widget to specify the number of DataFrames to concatenate
+    num_concat = st.number_input("Enter the number of DataFrames to concatenate", min_value=1, max_value=len(dataframes), value=1)
+
     # Multiselect widget to choose DataFrames to concatenate
-    selected_dfs = st.multiselect("Select DataFrames to concatenate", [f"Group {i+1}" for i in range(len(dataframes))])
+    selected_dfs = st.multiselect("Select DataFrames to concatenate", [f"Group {i+1}" for i in range(len(dataframes))], max_selections=num_concat)
 
     if selected_dfs:
-        # Concatenate the selected DataFrames
+        # Concatenate the selected DataFrames vertically
         dfs_to_concat = [dataframes[int(i.split()[1])-1] for i in selected_dfs]
-        concatenated_df = pd.concat(dfs_to_concat, axis=1)
+        concatenated_df = pd.concat(dfs_to_concat, axis=0)
         
         # Display the concatenated DataFrame
         st.write("Concatenated DataFrame:")
