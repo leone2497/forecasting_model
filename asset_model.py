@@ -37,7 +37,7 @@ if file_to_analyze is not None:
     if machine_columns:
         # Group selected columns into sets of three
         for i in range(0, len(machine_columns), 4):
-            group = machine_columns[i:i + 4]  # Get the current group of three columns
+            group = machine_columns[i:i + 4]  # Get the current group of columns
             
             # Create a DataFrame for this group
             if all(col in df.columns for col in group):  # Check if all columns exist in df
@@ -47,23 +47,30 @@ if file_to_analyze is not None:
                 # Display the DataFrame for the current group
                 st.write(f"DataFrame for columns: {group}")
                 st.dataframe(group_df)
+                
+                # Input for number of machines
                 n_rows = st.number_input("Enter number of machines", min_value=1)
-                machine_array = []
+
+                # Initialize the input array for machine names and sizes
+                input_array = []
+                
                 # Generate the grid: left column for text, right column for numbers
                 for i in range(int(n_rows)):
-                col1, col2 = st.columns(2)  # Create two columns
-                with col1:
-                    text_input = st.text_input(f"Machine input{i+1}", key=f"text_{i}")
-                with col2:
-                    num_input = st.number_input(f"Sizeinput  {i+1}", key=f"num_{i}")
-    
-   
-    # Store the inputs as a tuple in the array
-                input_array.append((text_input, num_input))
-                machine_df= pd.DataFrame(input_array)
+                    col1, col2 = st.columns(2)  # Create two columns
+                    with col1:
+                        text_input = st.text_input(f"Machine input {i+1}", key=f"text_{i}")
+                    with col2:
+                        num_input = st.number_input(f"Size input {i+1}", key=f"num_{i}")
+                    
+                    # Store the inputs as a tuple in the array
+                    input_array.append((text_input, num_input))
+                
+                # Create a DataFrame for the machine inputs
+                machine_df = pd.DataFrame(input_array, columns=['Machine', 'Size'])
+                
+                # Display the DataFrame of machines and sizes
+                st.write("Machine DataFrame:")
+                st.dataframe(machine_df)
                 
             else:
                 st.warning(f"Some columns in the group {group} do not exist in the DataFrame.")
-                
-   
-    
