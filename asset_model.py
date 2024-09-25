@@ -94,36 +94,3 @@ if file_to_analyze is not None:
             else:
                 st.warning(f"Some columns in the group {group} do not exist in the DataFrame.")
     
-    # Input widget to specify the number of times to perform the concatenation
-    num_concat_times = st.number_input("Enter the number of times to concatenate", min_value=1, value=1)
-
-    # Multiselect widget to choose DataFrames to concatenate
-    selected_dfs = st.multiselect("Select DataFrames to concatenate", [f"Group {i + 1}" for i in range(len(dataframes))])
-
-    if selected_dfs:
-        # Concatenate the selected DataFrames vertically the specified number of times
-        dfs_to_concat = [dataframes[int(i.split()[1]) - 1] for i in selected_dfs]
-        concatenated_df = pd.concat(dfs_to_concat, axis=0)
-        
-        # Repeat the concatenation the specified number of times
-        for _ in range(num_concat_times - 1):
-            concatenated_df = pd.concat([concatenated_df] + dfs_to_concat, axis=0)
-        
-        # Display the concatenated DataFrame
-        st.write("Concatenated DataFrame:")
-        st.dataframe(concatenated_df)
-
-        # Visualization of the concatenated DataFrame
-        st.subheader("Visualization of Concatenated DataFrame")
-        if concatenated_df.shape[1] > 1:  # Ensure there is data to plot
-            plot_column = st.selectbox("Select a column to plot", concatenated_df.columns)
-            plt.figure(figsize=(10, 6))
-            plt.plot(concatenated_df.index, concatenated_df[plot_column], marker='o')
-            plt.title(f"Plot of {plot_column}")
-            plt.xlabel("Index")
-            plt.ylabel(plot_column)
-            st.pyplot(plt)
-
-        # Download button for the concatenated DataFrame
-        csv = concatenated_df.to_csv(index=False)
-        st.download_button(label="Download CSV", data=csv, file_name='concatenated_data.csv', mime='text/csv')
