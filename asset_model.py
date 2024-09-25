@@ -69,8 +69,6 @@ ELCO_df = pd.DataFrame(elco_array, columns=['Machine', 'Size'])
 st.write("ELCO DataFrame:")
 st.dataframe(ELCO_df)
 
-
-
 # Step 4: Handle selection of columns from the uploaded file (df)
 if file_to_analyze is not None:
     machine_columns = st.multiselect("Select machine columns", df.columns)
@@ -78,18 +76,23 @@ if file_to_analyze is not None:
     dataframes = []
     
     if machine_columns:
-        for  i in range(0, len(machine_columns), 4):
+        for i in range(0, len(machine_columns), 4):
             group = machine_columns[i:i + 4]  # Get the current group of up to 4 columns
             
             if all(col in df.columns for col in group):  # Check if all columns exist in df
-                group_df = df[group]
+                group_df = df[group].copy()  # Copy the DataFrame to avoid SettingWithCopyWarning
                 dataframes.append(group_df)
+
+                # Rename columns based on user input
+                renamed_columns = []
                 for col in group:
-                    new_col_name = st.text_input(f"Enter a new name for column {col} in group {group_index + 1}", value=col)
-                    # Rename the column in the DataFrame
-                    group_df.rename(columns={col: new_col_name}, inplace=True)
-                # Display the DataFrame for the current group
-                    st.write(f"DataFrame for columns: {group}")
-                    st.dataframe(group_df)
+                    new_col_name = st.text_input(f"Enter a new name for column {col}:", value=col)
+                    renamed_columns.append(new_col_name)
+                
+                group_df.columns = renamed_columns  # Assign new column names
+                
+                # Display the DataFrame for the current group with renamed columns
+                st.write(f"DataFrame for renamed columns: {renamed_columns}")
+                st.dataframe(group_df)
             else:
                 st.warning(f"Some columns in the group {group} do not exist in the DataFrame.")
