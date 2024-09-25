@@ -96,7 +96,8 @@ if file_to_analyze is not None:
                 st.dataframe(group_df)
             else:
                 st.warning(f"Some columns in the group {group} do not exist in the DataFrame.")
-    Input for the number of merged DataFrames to create
+
+# Step 5: Input for the number of merged DataFrames to create
 if dataframes:
     num_merged_dfs = st.number_input("How many merged databases do you want to create?", min_value=1, max_value=len(dataframes))
 
