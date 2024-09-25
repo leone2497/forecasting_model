@@ -48,19 +48,19 @@ if file_to_analyze is not None:
                 st.write(f"DataFrame for columns: {group}")
                 st.dataframe(group_df)
                 n_rows = st.number_input("Enter number of machines", min_value=1)
-    machine_array = []
+                machine_array = []
+                # Generate the grid: left column for text, right column for numbers
+                for i in range(int(n_rows)):
+                col1, col2 = st.columns(2)  # Create two columns
+                with col1:
+                    text_input = st.text_input(f"Machine input{i+1}", key=f"text_{i}")
+                with col2:
+                    num_input = st.number_input(f"Sizeinput  {i+1}", key=f"num_{i}")
     
-    # Generate the grid: left column for text, right column for numbers
-    for i in range(int(n_rows)):
-    col1, col2 = st.columns(2)  # Create two columns
-    with col1:
-        text_input = st.text_input(f"Machine input{i+1}", key=f"text_{i}")
-    with col2:
-        num_input = st.number_input(f"Sizeinput  {i+1}", key=f"num_{i}")
-    
+   
     # Store the inputs as a tuple in the array
-    input_array.append((text_input, num_input))
-    machine_df= pd.DataFrame(input_array)
+                input_array.append((text_input, num_input))
+                machine_df= pd.DataFrame(input_array)
                 
             else:
                 st.warning(f"Some columns in the group {group} do not exist in the DataFrame.")
