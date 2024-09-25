@@ -32,9 +32,11 @@ if file_to_analyze is not None:
 
     # Input for number of machines
     n_rows = st.number_input(f"Enter number of TC", min_value=1)
+    ELCO_rows = st.number_input(f"Enter number of ELCO", min_value=1)
 
     # Initialize the input array for machine names and sizes
     input_array = []
+    elco_array=[]
                 
     # Generate the grid: left column for text, right column for numbers
     for j in range(int(n_rows)):
@@ -48,11 +50,29 @@ if file_to_analyze is not None:
         input_array.append((text_input, num_input))
                 
     # Create a DataFrame for the machine inputs
-    machine_df = pd.DataFrame(input_array, columns=['Machine', 'Size'])
+    TC_df = pd.DataFrame(input_array, columns=['Machine', 'Size'])
                 
     # Display the DataFrame of machines and sizes
-    st.write("Machine DataFrame:")
-    st.dataframe(machine_df)
+    st.write("TC DataFrame:")
+    st.dataframe(TC_df)
+
+
+    for j in range(int(n_rows)):
+        col1, col2 = st.columns(2)  # Create two columns
+        with col1:
+            text_input = st.text_input(f"TC{j+1}")
+        with col2:
+            num_input = st.number_input(f"{j+1}")
+                    
+        # Store the inputs as a tuple in the array
+        elco_array.append((text_input, num_input))
+                
+    # Create a DataFrame for the machine inputs
+    ELCO_df = pd.DataFrame(elco_array, columns=['Machine', 'Size'])
+                
+    # Display the DataFrame of machines and sizes
+    st.write("ELCO DataFrame:")
+    st.dataframe(ELCO_df)
     
     # Allow users to select machine columns
     machine_columns = st.multiselect("Select machine columns", df.columns)
