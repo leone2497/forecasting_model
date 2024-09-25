@@ -96,3 +96,27 @@ if file_to_analyze is not None:
                 st.dataframe(group_df)
             else:
                 st.warning(f"Some columns in the group {group} do not exist in the DataFrame.")
+    Input for the number of merged DataFrames to create
+if dataframes:
+    num_merged_dfs = st.number_input("How many merged databases do you want to create?", min_value=1, max_value=len(dataframes))
+
+    # Loop to allow users to select which dataframes to merge for each merged dataset
+    merged_dataframes = []
+    for merge_idx in range(int(num_merged_dfs)):
+        st.write(f"### Merged Database {merge_idx + 1}")
+        selected_dfs = st.multiselect(f"Select DataFrames to merge for Merged Database {merge_idx + 1}", options=range(len(dataframes)), format_func=lambda x: f"Group {x + 1}")
+        
+        if selected_dfs:
+            dfs_to_merge = [dataframes[i] for i in selected_dfs]
+            merged_df = pd.concat(dfs_to_merge, ignore_index=True)
+            
+            # Display the merged DataFrame
+            st.write(f"Merged DataFrame {merge_idx + 1}:")
+            st.dataframe(merged_df)
+            
+            merged_dataframes.append(merged_df)
+
+    # Option to download each merged DataFrame
+    for idx, merged_df in enumerate(merged_dataframes):
+        csv = merged_df.to_csv(index=False)
+        st.download_button(label=f"Download Merged CSV {idx + 1}", data=csv, file_name=f'merged_data_{idx + 1}.csv', mime='text/csv')
