@@ -117,6 +117,7 @@ if dataframes:
             
             merged_dataframes.append(merged_df)
             merged_dataframes["Rapporto potenza assorbita/pot tot"]=merge_dataframes[1]/merge_dataframes[2]
+            st.dataframe(merged_dataframes)
 
     # Option to download each merged DataFrame
     for idx, merged_df in enumerate(merged_dataframes):
