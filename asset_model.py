@@ -28,11 +28,10 @@ if file_to_analyze is not None:
     hours_data = st.sidebar.selectbox("Indicate the power column", df.columns.tolist())
     time_column = st.sidebar.selectbox("Indicate the date time column", df.columns.tolist())
 
-    # Initialize group index
-    group_index = 0
+   
 
     # Input for number of machines
-    n_rows = st.number_input(f"Enter number of TC", min_value=1, key=f"n_rows_{group_index}")
+    n_rows = st.number_input(f"Enter number of TC", min_value=1)
 
     # Initialize the input array for machine names and sizes
     input_array = []
@@ -41,9 +40,9 @@ if file_to_analyze is not None:
     for j in range(int(n_rows)):
         col1, col2 = st.columns(2)  # Create two columns
         with col1:
-            text_input = st.text_input(f"TC{j+1}", key=f"machine_text_{group_index}_{j}")
+            text_input = st.text_input(f"TC{j+1}")
         with col2:
-            num_input = st.number_input(f"{j+1}", key=f"machine_num_{group_index}_{j}")
+            num_input = st.number_input(f"{j+1}")
                     
         # Store the inputs as a tuple in the array
         input_array.append((text_input, num_input))
