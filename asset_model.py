@@ -44,7 +44,7 @@ if file_to_analyze is not None:
     for j in range(int(n_rows)):
         col1, col2 = st.columns(2)  # Create two columns
         with col1:
-            text_input = st.text_input(f"TC{j + 1} Name")
+            text_input = st.text_input(f"TC{j + 1}")
         with col2:
             num_input = st.number_input(f"TC{j + 1} Size", min_value=0)
 
@@ -60,9 +60,9 @@ if file_to_analyze is not None:
     for j in range(int(ELCO_rows)):
         col1, col2 = st.columns(2)  # Create two columns
         with col1:
-            ELCO_text_input = st.text_input(f"ELCO{j + 1} Name")
+            ELCO_text_input = st.text_input(f"ELCO {j + 1}")
         with col2:
-            ELCO_num_input = st.number_input(f"ELCO{j + 1} Size", min_value=0)
+            ELCO_num_input = st.number_input(f"ELCO {j + 1} Size", min_value=0)
 
         if ELCO_text_input and ELCO_num_input:  # Check for valid input
             elco_array.append((ELCO_text_input, ELCO_num_input))
