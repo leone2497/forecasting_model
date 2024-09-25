@@ -44,9 +44,9 @@ if file_to_analyze is not None:
     for j in range(int(n_rows)):
         col1, col2 = st.columns(2)  # Create two columns
         with col1:
-            text_input = st.text_input(f"TC{j + 1}")
+            text_input = st.text_input(f"TC {j + 1} Name")
         with col2:
-            num_input = st.number_input(f"TC{j + 1} Size", min_value=0)
+            num_input = st.number_input(f"TC {j + 1} Size", min_value=0)
 
         if text_input and num_input:  # Check for valid input
             input_array.append((text_input, num_input))
@@ -60,7 +60,7 @@ if file_to_analyze is not None:
     for j in range(int(ELCO_rows)):
         col1, col2 = st.columns(2)  # Create two columns
         with col1:
-            ELCO_text_input = st.text_input(f"ELCO {j + 1}")
+            ELCO_text_input = st.text_input(f"ELCO {j + 1} Name")
         with col2:
             ELCO_num_input = st.number_input(f"ELCO {j + 1} Size", min_value=0)
 
@@ -72,25 +72,24 @@ if file_to_analyze is not None:
     st.write("ELCO DataFrame:")
     st.dataframe(ELCO_df)
     
-    # Allow users to select machine columns
-    machine_columns = st.multiselect("Select machine columns", df.columns)
+    # Store the DataFrames in a dictionary
+    dataframes_dict = {
+        "TC": TC_df,
+        "ELCO": ELCO_df,
+    }
 
-    # Initialize a list to store DataFrames for groups of four
-    dataframes = []
+    # Allow users to select DataFrames to merge
+    selected_dfs = st.multiselect("Select DataFrames to merge", list(dataframes_dict.keys()))
 
-    if machine_columns:
-        # Group selected columns into sets of four
-        for group_index, i in enumerate(range(0, len(machine_columns), 4)):
-            group = machine_columns[i:i + 4]  # Get the current group
-            
-            # Create a DataFrame for this group
-            if all(col in df.columns for col in group):  # Check if all columns exist in df
-                group_df = df[group]
-                dataframes.append(group_df)
-                
-                # Display the DataFrame for the current group
-                st.write(f"DataFrame for columns: {group}")
-                st.dataframe(group_df)
-            else:
-                st.warning(f"Some columns in the group {group} do not exist in the DataFrame.")
-    
+    if selected_dfs:
+        # Concatenate the selected DataFrames
+        dfs_to_concat = [dataframes_dict[df] for df in selected_dfs]
+        merged_df = pd.concat(dfs_to_concat, ignore_index=True)
+        
+        # Display the merged DataFrame
+        st.write("Merged DataFrame:")
+        st.dataframe(merged_df)
+
+        # Optionally, provide a download button for the merged DataFrame
+        csv = merged_df.to_csv(index=False)
+        st.download_button(label="Download Merged CSV", data=csv, file_name='merged_data.csv', mime='text/csv')
