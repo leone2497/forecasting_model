@@ -47,10 +47,7 @@ if file_to_analyze is not None:
                 # Display the DataFrame for the current group
                 st.write(f"DataFrame for columns: {group}")
                 st.dataframe(group_df)
-            else:
-                st.warning(f"Some columns in the group {group} do not exist in the DataFrame.")
-                
-    n_rows = st.number_input("Enter number of machines", min_value=1)
+                n_rows = st.number_input("Enter number of machines", min_value=1)
     machine_array = []
     
     # Generate the grid: left column for text, right column for numbers
@@ -64,4 +61,9 @@ if file_to_analyze is not None:
     # Store the inputs as a tuple in the array
     input_array.append((text_input, num_input))
     machine_df= pd.DataFrame(input_array)
+                
+            else:
+                st.warning(f"Some columns in the group {group} do not exist in the DataFrame.")
+                
+   
     
