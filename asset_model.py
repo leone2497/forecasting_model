@@ -58,7 +58,7 @@ if file_to_analyze is not None:
     # Allow users to select machine columns
     machine_columns = st.multiselect("Select machine columns", df.columns)
 
-    # Initialize a list to store DataFrames for groups of three
+    # Initialize a list to store DataFrames for groups of four
     dataframes = []
 
     if machine_columns:
@@ -76,3 +76,15 @@ if file_to_analyze is not None:
                 st.dataframe(group_df)
             else:
                 st.warning(f"Some columns in the group {group} do not exist in the DataFrame.")
+    
+    # Multiselect widget to choose DataFrames to concatenate
+    selected_dfs = st.multiselect("Select DataFrames to concatenate", [f"Group {i+1}" for i in range(len(dataframes))])
+
+    if selected_dfs:
+        # Concatenate the selected DataFrames
+        dfs_to_concat = [dataframes[int(i.split()[1])-1] for i in selected_dfs]
+        concatenated_df = pd.concat(dfs_to_concat, axis=1)
+        
+        # Display the concatenated DataFrame
+        st.write("Concatenated DataFrame:")
+        st.dataframe(concatenated_df)
