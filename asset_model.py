@@ -57,15 +57,15 @@ if file_to_analyze is not None:
     st.dataframe(TC_df)
 
 
-    for j in range(int(n_rows)):
+    for j in range(int(ELCO_rows)):
         col1, col2 = st.columns(2)  # Create two columns
         with col1:
-            text_input = st.text_input(f"TC{j+1}")
+            ELCO_text_input = st.text_input(f"TC{j+1}")
         with col2:
-            num_input = st.number_input(f"{j+1}")
+            ELCO_num_input = st.number_input(f"{j+1}")
                     
         # Store the inputs as a tuple in the array
-        elco_array.append((text_input, num_input))
+        elco_array.append((ELCO_text_input, ELCO_num_input))
                 
     # Create a DataFrame for the machine inputs
     ELCO_df = pd.DataFrame(elco_array, columns=['Machine', 'Size'])
