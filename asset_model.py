@@ -93,3 +93,24 @@ if file_to_analyze is not None:
         # Optionally, provide a download button for the merged DataFrame
         csv = merged_df.to_csv(index=False)
         st.download_button(label="Download Merged CSV", data=csv, file_name='merged_data.csv', mime='text/csv')
+         # Allow users to select machine columns
+    machine_columns = st.multiselect("Select machine columns", df.columns)
+
+    # Initialize a list to store DataFrames for groups of four
+    dataframes = []
+
+    if machine_columns:
+        # Group selected columns into sets of four
+        for group_index, i in enumerate(range(0, len(machine_columns), 4)):
+            group = machine_columns[i:i + 4]  # Get the current group
+            
+            # Create a DataFrame for this group
+            if all(col in df.columns for col in group):  # Check if all columns exist in df
+                group_df = df[group]
+                dataframes.append(group_df)
+                
+                # Display the DataFrame for the current group
+                st.write(f"DataFrame for columns: {group}")
+                st.dataframe(group_df)
+            else:
+                st.warning(f"Some columns in the group {group} do not exist in the DataFrame.")
