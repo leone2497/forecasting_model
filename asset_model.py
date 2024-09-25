@@ -32,7 +32,7 @@ if file_to_analyze is not None:
     group_index = 0
 
     # Input for number of machines
-    n_rows = st.number_input(f"Enter number of machines for group {group_index+1}", min_value=1, key=f"n_rows_{group_index}")
+    n_rows = st.number_input(f"Enter number of TC", min_value=1, key=f"n_rows_{group_index}")
 
     # Initialize the input array for machine names and sizes
     input_array = []
