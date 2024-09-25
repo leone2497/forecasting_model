@@ -57,11 +57,12 @@ if file_to_analyze is not None:
                 # Generate the grid: left column for text, right column for numbers
                 for i in range(int(n_rows)):
                     col1, col2 = st.columns(2)  # Create two columns
-                    with col1:
-                        text_input = st.text_input(f"Machine input {i+1}", key=f"text_{i}")
-                    with col2:
-                        num_input = st.number_input(f"Size input {i+1}", key=f"num_{i}")
-                    
+    
+    # Generate unique keys using a combination of i and a prefix (e.g., "machine_")
+                with col1:
+                    text_input = st.text_input(f"Machine input {i+1}", key=f"machine_text_{i}")
+                with col2
+                num_input = st.number_input(f"Size input {i+1}", key=f"machine_num_{i}")
                     # Store the inputs as a tuple in the array
                     input_array.append((text_input, num_input))
                 
