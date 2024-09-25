@@ -77,17 +77,23 @@ if file_to_analyze is not None:
             else:
                 st.warning(f"Some columns in the group {group} do not exist in the DataFrame.")
     
-    # Input widget to specify the number of DataFrames to concatenate
-    num_concat = st.number_input("Enter the number of DataFrames to concatenate", min_value=1, max_value=len(dataframes), value=1)
+    # Input widget to specify the number of DataFrames to create
+    num_dfs_to_create = st.number_input("Enter the number of DataFrames to create", min_value=1, max_value=len(dataframes), value=1)
 
     # Multiselect widget to choose DataFrames to concatenate
-    selected_dfs = st.multiselect("Select DataFrames to concatenate", [f"Group {i+1}" for i in range(len(dataframes))], max_selections=num_concat)
+    selected_dfs = st.multiselect("Select DataFrames to concatenate", [f"Group {i+1}" for i in range(len(dataframes))])
 
     if selected_dfs:
-        # Concatenate the selected DataFrames vertically
-        dfs_to_concat = [dataframes[int(i.split()[1])-1] for i in selected_dfs]
-        concatenated_df = pd.concat(dfs_to_concat, axis=0)
+        # Calculate the number of DataFrames to concatenate per new DataFrame
+        dfs_per_new_df = len(selected_dfs) // num_dfs_to_create
         
-        # Display the concatenated DataFrame
-        st.write("Concatenated DataFrame:")
-        st.dataframe(concatenated_df)
+        # Create the specified number of DataFrames through concatenation
+        for i in range(num_dfs_to_create):
+            start_index = i * dfs_per_new_df
+            end_index = start_index + dfs_per_new_df
+            dfs_to_concat = [dataframes[int(i.split()[1])-1] for i in selected_dfs[start_index:end_index]]
+            concatenated_df = pd.concat(dfs_to_concat, axis=0)
+            
+            # Display the concatenated DataFrame
+            st.write(f"Concatenated DataFrame {i+1}:")
+            st.dataframe(concatenated_df)
