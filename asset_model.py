@@ -84,9 +84,12 @@ if file_to_analyze is not None:
             if all(col in df.columns for col in group):  # Check if all columns exist in df
                 group_df = df[group]
                 dataframes.append(group_df)
-                
+                for col in group:
+                    new_col_name = st.text_input(f"Enter a new name for column {col} in group {group_index + 1}", value=col)
+                    # Rename the column in the DataFrame
+                    group_df.rename(columns={col: new_col_name}, inplace=True)
                 # Display the DataFrame for the current group
-                st.write(f"DataFrame for columns: {group}")
-                st.dataframe(group_df)
+                    st.write(f"DataFrame for columns: {group}")
+                    st.dataframe(group_df)
             else:
                 st.warning(f"Some columns in the group {group} do not exist in the DataFrame.")
