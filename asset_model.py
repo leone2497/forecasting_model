@@ -96,7 +96,11 @@ if df is not None:
     
     # Step 4: Input for required power and generate asset combinations
     required_power = st.number_input("Enter required power", min_value=1)
-    
+
+    # Initialize the assets variable before the button action
+    assets = []
+    asset_df = pd.DataFrame()
+
     if st.button("Generate Asset Combinations"):
         assets, final_power = create_assets(required_power, tc_data, elco_data)
         
@@ -107,7 +111,7 @@ if df is not None:
         st.write(f"Total generated power: {final_power}")
 
     # Step 5: Option to download the asset combination
-    if assets:
+    if not asset_df.empty:
         asset_csv = asset_df.to_csv(index=False)
         st.download_button(label="Download Asset CSV",
                            data=asset_csv,
