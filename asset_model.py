@@ -8,6 +8,7 @@ st.sidebar.title("Functions")
 # Step 1: File uploader for CSV or Excel files
 file_to_analyze = st.file_uploader("Choose a CSV or Excel file", type=["csv", "xls", "xlsx"])
 
+df = None
 if file_to_analyze is not None:
     try:
         # Read the uploaded file into a DataFrame
@@ -23,48 +24,51 @@ if file_to_analyze is not None:
     
     except Exception as e:
         st.error(f"Error reading the file: {e}")
- # Sidebar selections for power and date-time columns
-hours_data = st.sidebar.selectbox("Indicate the power column", df.columns.tolist())
-time_column = st.sidebar.selectbox("Indicate the date time column", df.columns.tolist())
-# Step 2: Handle user input for TC and ELCO data entry
-st.sidebar.write("Enter TC and ELCO Data:")
 
-# Input for number of machines (TC and ELCO)
-n_tc = st.number_input("Enter number of TC", min_value=1)
-n_elco = st.number_input("Enter number of ELCO", min_value=1)
+# Check if a DataFrame has been uploaded before proceeding
+if df is not None:
+    # Sidebar selections for power and date-time columns
+    hours_data = st.sidebar.selectbox("Indicate the power column", df.columns.tolist())
+    time_column = st.sidebar.selectbox("Indicate the date time column", df.columns.tolist())
 
-# TC Data entry
-tc_data = []
-for i in range(int(n_tc)):
-    col1, col2 = st.columns(2)
-    with col1:
-        tc_name = st.text_input(f"TC {i + 1} Name")
-    with col2:
-        tc_size = st.number_input(f"TC {i + 1} Size", min_value=0)
-    if tc_name and tc_size:
-        tc_data.append((tc_name, tc_size))
+    # Step 2: Handle user input for TC and ELCO data entry
+    st.sidebar.write("Enter TC and ELCO Data:")
 
-TC_df = pd.DataFrame(tc_data, columns=['Machine', 'Size'])
-st.write("TC DataFrame:")
-st.dataframe(TC_df)
+    # Input for number of machines (TC and ELCO)
+    n_tc = st.number_input("Enter number of TC", min_value=1)
+    n_elco = st.number_input("Enter number of ELCO", min_value=1)
 
-# ELCO Data entry
-elco_data = []
-for i in range(int(n_elco)):
-    col1, col2 = st.columns(2)
-    with col1:
-        elco_name = st.text_input(f"ELCO {i + 1} Name")
-    with col2:
-        elco_size = st.number_input(f"ELCO {i + 1} Size", min_value=0)
-    if elco_name and elco_size:
-        elco_data.append((elco_name, elco_size))
+    # TC Data entry
+    tc_data = []
+    for i in range(int(n_tc)):
+        col1, col2 = st.columns(2)
+        with col1:
+            tc_name = st.text_input(f"TC {i + 1} Name")
+        with col2:
+            tc_size = st.number_input(f"TC {i + 1} Size", min_value=0)
+        if tc_name and tc_size:
+            tc_data.append((tc_name, tc_size))
 
-ELCO_df = pd.DataFrame(elco_data, columns=['Machine', 'Size'])
-st.write("ELCO DataFrame:")
-st.dataframe(ELCO_df)
+    TC_df = pd.DataFrame(tc_data, columns=['Machine', 'Size'])
+    st.write("TC DataFrame:")
+    st.dataframe(TC_df)
 
-# Step 4: Select machine columns from the uploaded file
-if file_to_analyze is not None:
+    # ELCO Data entry
+    elco_data = []
+    for i in range(int(n_elco)):
+        col1, col2 = st.columns(2)
+        with col1:
+            elco_name = st.text_input(f"ELCO {i + 1} Name")
+        with col2:
+            elco_size = st.number_input(f"ELCO {i + 1} Size", min_value=0)
+        if elco_name and elco_size:
+            elco_data.append((elco_name, elco_size))
+
+    ELCO_df = pd.DataFrame(elco_data, columns=['Machine', 'Size'])
+    st.write("ELCO DataFrame:")
+    st.dataframe(ELCO_df)
+
+    # Step 4: Select machine columns from the uploaded file
     machine_columns = st.multiselect("Select machine columns", df.columns)
     dataframes = []
 
@@ -83,36 +87,39 @@ if file_to_analyze is not None:
             else:
                 st.warning(f"Some columns in the group {group} do not exist in the DataFrame.")
 
-# Step 5: Input for number of merged DataFrames to create
-if dataframes:
-    num_merged_dfs = st.number_input("How many merged databases do you want to create?", min_value=1, max_value=len(dataframes))
-    merged_dataframes = []
+    # Step 5: Input for number of merged DataFrames to create
+    if dataframes:
+        num_merged_dfs = st.number_input("How many merged databases do you want to create?", min_value=1, max_value=len(dataframes))
+        merged_dataframes = []
 
-    # Loop through user input to merge DataFrames
-    for merge_idx in range(int(num_merged_dfs)):
-        st.write(f"### Merged Database {merge_idx + 1}")
-        selected_dfs = st.multiselect(f"Select DataFrames to merge for Merged Database {merge_idx + 1}",
-                                      options=range(len(dataframes)),
-                                      format_func=lambda x: f"Group {x + 1}")
+        # Loop through user input to merge DataFrames
+        for merge_idx in range(int(num_merged_dfs)):
+            st.write(f"### Merged Database {merge_idx + 1}")
+            selected_dfs = st.multiselect(f"Select DataFrames to merge for Merged Database {merge_idx + 1}",
+                                          options=range(len(dataframes)),
+                                          format_func=lambda x: f"Group {x + 1}")
 
-        if selected_dfs:
-            dfs_to_merge = [dataframes[i] for i in selected_dfs]
-            merged_df = pd.concat(dfs_to_merge, ignore_index=True)
+            if selected_dfs:
+                dfs_to_merge = [dataframes[i] for i in selected_dfs]
+                merged_df = pd.concat(dfs_to_merge, ignore_index=True)
 
-            # Calculate 'Rapporto potenza assorbita/pot tot' if applicable (based on 2nd and 3rd columns)
-            if merged_df.shape[1] >= 3:
-                merged_df["Rapporto potenza assorbita/pot tot"] = merged_df.iloc[:, 1] / merged_df.iloc[:, 2]
+                # Calculate 'Rapporto potenza assorbita/pot tot' if applicable (based on 2nd and 3rd columns)
+                if merged_df.shape[1] >= 3:
+                    try:
+                        merged_df["Rapporto potenza assorbita/pot tot"] = merged_df.iloc[:, 1] / merged_df.iloc[:, 2]
+                    except ZeroDivisionError:
+                        st.error("Division by zero encountered in calculating 'Rapporto potenza assorbita/pot tot'.")
 
-            # Display the merged DataFrame
-            st.write(f"Merged DataFrame {merge_idx + 1}:")
-            st.dataframe(merged_df)
+                # Display the merged DataFrame
+                st.write(f"Merged DataFrame {merge_idx + 1}:")
+                st.dataframe(merged_df)
 
-            merged_dataframes.append(merged_df)
+                merged_dataframes.append(merged_df)
 
-    # Step 6: Option to download each merged DataFrame as CSV
-    for idx, merged_df in enumerate(merged_dataframes):
-        csv = merged_df.to_csv(index=False)
-        st.download_button(label=f"Download Merged CSV {idx + 1}",
-                           data=csv,
-                           file_name=f'merged_data_{idx + 1}.csv',
-                           mime='text/csv')
+        # Step 6: Option to download each merged DataFrame as CSV
+        for idx, merged_df in enumerate(merged_dataframes):
+            csv = merged_df.to_csv(index=False)
+            st.download_button(label=f"Download Merged CSV {idx + 1}",
+                               data=csv,
+                               file_name=f'merged_data_{idx + 1}.csv',
+                               mime='text/csv')
