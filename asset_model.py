@@ -121,3 +121,55 @@ if df is not None:
                                data=asset_csv,
                                file_name='asset_combinations.csv',
                                mime='text/csv')
+            if file_to_analyze is not None:
+    machine_columns = st.multiselect("Select machine columns", df.columns)
+    dataframes = []
+
+    # Group columns into sets of up to 4 and allow renaming
+    if machine_columns:
+        for i in range(0, len(machine_columns), 4):
+            group = machine_columns[i:i + 4]
+            if all(col in df.columns for col in group):
+                group_df = df[group].copy()
+                renamed_columns = [st.text_input(f"Rename column {col}:", value=col) for col in group]
+                group_df.columns = renamed_columns
+                dataframes.append(group_df)
+
+                st.write(f"DataFrame for renamed columns: {renamed_columns}")
+                st.dataframe(group_df)
+            else:
+                st.warning(f"Some columns in the group {group} do not exist in the DataFrame.")
+
+# Step 5: Input for number of merged DataFrames to create
+if dataframes:
+    num_merged_dfs = st.number_input("How many merged databases do you want to create?", min_value=1, max_value=len(dataframes))
+    merged_dataframes = []
+
+    # Loop through user input to merge DataFrames
+    for merge_idx in range(int(num_merged_dfs)):
+        st.write(f"### Merged Database {merge_idx + 1}")
+        selected_dfs = st.multiselect(f"Select DataFrames to merge for Merged Database {merge_idx + 1}",
+                                      options=range(len(dataframes)),
+                                      format_func=lambda x: f"Group {x + 1}")
+
+        if selected_dfs:
+            dfs_to_merge = [dataframes[i] for i in selected_dfs]
+            merged_df = pd.concat(dfs_to_merge, ignore_index=True)
+
+            # Calculate 'Rapporto potenza assorbita/pot tot' if applicable (based on 2nd and 3rd columns)
+            if merged_df.shape[1] >= 3:
+                merged_df["Rapporto potenza assorbita/pot tot"] = merged_df.iloc[:, 1] / merged_df.iloc[:, 2]
+
+            # Display the merged DataFrame
+            st.write(f"Merged DataFrame {merge_idx + 1}:")
+            st.dataframe(merged_df)
+
+            merged_dataframes.append(merged_df)
+
+    # Step 6: Option to download each merged DataFrame as CSV
+    for idx, merged_df in enumerate(merged_dataframes):
+        csv = merged_df.to_csv(index=False)
+        st.download_button(label=f"Download Merged CSV {idx + 1}",
+                           data=csv,
+                           file_name=f'merged_data_{idx + 1}.csv',
+                           mime='text/csv')
