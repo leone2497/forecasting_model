@@ -73,6 +73,9 @@ if df is not None:
         """Function to create assets based on required power using ELCO and TC."""
         total_elco_power = sum([elco[1] for elco in elco_data])  # Sum of ELCO sizes
         
+        st.write(f"Total ELCO Power: {total_elco_power}")
+        st.write(f"Required Power: {required_power}")
+
         # Start by using ELCOs
         assets = []
         current_power = 0
@@ -92,6 +95,7 @@ if df is not None:
                 if current_power >= required_power:
                     break
         
+        st.write(f"Final Power Generated: {current_power}")
         return assets, current_power
     
     # Step 4: Input for required power and generate asset combinations
@@ -102,13 +106,21 @@ if df is not None:
     asset_df = pd.DataFrame()
 
     if st.button("Generate Asset Combinations"):
-        assets, final_power = create_assets(required_power, tc_data, elco_data)
-        
-        st.write(f"Asset combination to meet the required power ({required_power}):")
-        asset_df = pd.DataFrame(assets, columns=['Machine', 'Size'])
-        st.dataframe(asset_df)
-        
-        st.write(f"Total generated power: {final_power}")
+        if not elco_data:
+            st.error("Please enter ELCO data.")
+        elif not tc_data:
+            st.error("Please enter TC data.")
+        else:
+            assets, final_power = create_assets(required_power, tc_data, elco_data)
+            
+            if assets:
+                st.write(f"Asset combination to meet the required power ({required_power}):")
+                asset_df = pd.DataFrame(assets, columns=['Machine', 'Size'])
+                st.dataframe(asset_df)
+            else:
+                st.error("No asset combination could be created. Ensure that the machines can meet the required power.")
+            
+            st.write(f"Total generated power: {final_power}")
 
     # Step 5: Option to download the asset combination
     if not asset_df.empty:
