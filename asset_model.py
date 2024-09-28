@@ -163,7 +163,15 @@ if dataframes:
                 merged_df["Rapporto potenza assorbita/pot tot"] = merged_df.iloc[:, 1] / merged_df.iloc[:, 2]
                 merged_df["Fuel/Rapporto potenza assorbita"] = merged_df.iloc[:, 3] / merged_df.iloc[:, 1]
 
-            # Display the merged DataFrame
+                # Create classes for 'Rapporto potenza assorbita/pot tot'
+                merged_df['Class'] = pd.cut(
+                    merged_df["Rapporto potenza assorbita/pot tot"] * 100,  # Convert to percentage
+                    bins=[0, 30, 50, 70, 100],  # Define the ranges
+                    labels=['0-30%', '30-50%', '50-70%', '70-100%'],  # Labels for the ranges
+                    include_lowest=True
+                )
+
+            # Display the merged DataFrame with the new 'Class' column
             st.write(f"Merged DataFrame {merge_idx + 1}:")
             st.dataframe(merged_df)
 
@@ -176,3 +184,4 @@ if dataframes:
                            data=csv,
                            file_name=f'merged_data_{idx + 1}.csv',
                            mime='text/csv')
+
