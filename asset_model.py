@@ -46,13 +46,13 @@ if df is not None:
         with col1:
             tc_name = st.text_input(f"TC {i + 1} Name")
         with col2:
-            tc_size = st.number_input(f"TC {i + 1} Size", min_value=0)
+            tc_size = st.number_input(f"TC {i + 1} Size (kW)", min_value=0)
         with col3:
-            tc_carico_minimo_tecnico= st.number_input(f"TC {i + 1} Carico minimo tecnico", min_value=0, max_value=100)
+            tc_carico_minimo_tecnico = st.number_input(f"TC {i + 1} Carico minimo tecnico (%)", min_value=0, max_value=100)
         if tc_name and tc_size:
             tc_data.append((tc_name, tc_size, tc_carico_minimo_tecnico))
 
-    TC_df = pd.DataFrame(tc_data, columns=['Machine', 'Size','Carico minimo tecnico'])
+    TC_df = pd.DataFrame(tc_data, columns=['Machine', 'Size (kW)', 'Carico minimo tecnico (%)'])
     st.write("TC DataFrame:")
     st.dataframe(TC_df)
 
@@ -63,13 +63,13 @@ if df is not None:
         with col1:
             elco_name = st.text_input(f"ELCO {i + 1} Name")
         with col2:
-            elco_size = st.number_input(f"ELCO {i + 1} Size", min_value=0)
+            elco_size = st.number_input(f"ELCO {i + 1} Size (kW)", min_value=0)
         with col3:
-            elco_carico_minimo_tecnico=st.number_input(f"ELCO {i + 1} Carico minimo tecnico", min_value=0, max_value=100)
+            elco_carico_minimo_tecnico = st.number_input(f"ELCO {i + 1} Carico minimo tecnico (%)", min_value=0, max_value=100)
         if elco_name and elco_size:
             elco_data.append((elco_name, elco_size, elco_carico_minimo_tecnico))
 
-    ELCO_df = pd.DataFrame(elco_data, columns=['Machine', 'Size', 'Carico minimo tecnico'])
+    ELCO_df = pd.DataFrame(elco_data, columns=['Machine', 'Size (kW)', 'Carico minimo tecnico (%)'])
     st.write("ELCO DataFrame:")
     st.dataframe(ELCO_df)
 
@@ -109,7 +109,7 @@ if df is not None:
                 asset_list.append({
                     'Combination': f"Asset Combination {idx + 1}",
                     'Machines': ' + '.join([f"{machine[0]} ({machine[1]} kW)" for machine in asset]),
-                    'Total Power': sum([machine[1] for machine in asset])
+                    'Total Power (kW)': sum([machine[1] for machine in asset])
                 })
             
             asset_df = pd.DataFrame(asset_list)
@@ -121,7 +121,9 @@ if df is not None:
                                data=asset_csv,
                                file_name='asset_combinations.csv',
                                mime='text/csv')
-            if file_to_analyze is not None:
+
+# The following part (machine columns selection and merging) should be separate from the asset generation logic:
+if file_to_analyze is not None and df is not None:
     machine_columns = st.multiselect("Select machine columns", df.columns)
     dataframes = []
 
