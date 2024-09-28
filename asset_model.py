@@ -42,30 +42,34 @@ if df is not None:
     # TC Data entry
     tc_data = []
     for i in range(int(n_tc)):
-        col1, col2 = st.columns(2)
+        col1, col2, col3 = st.columns(3)
         with col1:
             tc_name = st.text_input(f"TC {i + 1} Name")
         with col2:
             tc_size = st.number_input(f"TC {i + 1} Size", min_value=0)
+        with col3:
+            tc_carico_minimo_tecnico= st.number_input(f"TC {i + 1} Carico minimo tecnico", min_value=0)
         if tc_name and tc_size:
-            tc_data.append((tc_name, tc_size))
+            tc_data.append((tc_name, tc_size, tc_carico_minimo_tecnico))
 
-    TC_df = pd.DataFrame(tc_data, columns=['Machine', 'Size'])
+    TC_df = pd.DataFrame(tc_data, columns=['Machine', 'Size','Carico minimo tecnico'])
     st.write("TC DataFrame:")
     st.dataframe(TC_df)
 
     # ELCO Data entry
     elco_data = []
     for i in range(int(n_elco)):
-        col1, col2 = st.columns(2)
+        col1, col2, col3 = st.columns(3)
         with col1:
             elco_name = st.text_input(f"ELCO {i + 1} Name")
         with col2:
             elco_size = st.number_input(f"ELCO {i + 1} Size", min_value=0)
+        with col3:
+            elco_carico_minimo_tecnico=st.number_input(f"ELCO {i + 1} Carico minimo tecnico", min_value=0)
         if elco_name and elco_size:
-            elco_data.append((elco_name, elco_size))
+            elco_data.append((elco_name, elco_size, elco_carico_minimo_tecnico))
 
-    ELCO_df = pd.DataFrame(elco_data, columns=['Machine', 'Size'])
+    ELCO_df = pd.DataFrame(elco_data, columns=['Machine', 'Size', 'Carico minimo tecnico'])
     st.write("ELCO DataFrame:")
     st.dataframe(ELCO_df)
 
