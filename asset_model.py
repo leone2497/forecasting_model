@@ -146,7 +146,7 @@ if file_to_analyze is not None and df is not None:
 if dataframes:
     num_merged_dfs = st.number_input("How many merged databases do you want to create?", min_value=1, max_value=len(dataframes))
     merged_dataframes = []
-
+    
     # Loop through user input to merge DataFrames
     for merge_idx in range(int(num_merged_dfs)):
         st.write(f"### Merged Database {merge_idx + 1}")
@@ -171,17 +171,33 @@ if dataframes:
                     include_lowest=True
                 )
 
-            # Display the merged DataFrame with the new 'Class' column
-            st.write(f"Merged DataFrame {merge_idx + 1}:")
-            st.dataframe(merged_df)
+            # Group by 'Class' and calculate the mean for each class
+            summary_df = merged_df.groupby('Class').agg(
+                Lim_inf=('Rapporto potenza assorbita/pot tot', lambda x: x.min() * 100),  # Lower limit of the class
+                Lim_sup=('Rapporto potenza assorbita/pot tot', lambda x: x.max() * 100),  # Upper limit of the class
+                Rapporto_fuel=('Fuel/Rapporto potenza assorbita', 'mean')  # Average 'Fuel/Rapporto potenza assorbita'
+            ).reset_index()
+
+            # Rename the columns for clarity
+            summary_df.columns = ['Fasce di carico', 'Lim inf', 'Lim sup', 'Rapporto fuel - Pass']
+
+            # Display the new DataFrame
+            st.write(f"Summary DataFrame for Merged Database {merge_idx + 1}:")
+            st.dataframe(summary_df)
 
             merged_dataframes.append(merged_df)
 
-    # Step 6: Option to download each merged DataFrame as CSV
+            # Option to download the summary DataFrame
+            csv_summary = summary_df.to_csv(index=False)
+            st.download_button(label=f"Download Summary CSV {merge_idx + 1}",
+                               data=csv_summary,
+                               file_name=f'summary_data_{merge_idx + 1}.csv',
+                               mime='text/csv')
+
+    # Option to download each merged DataFrame as CSV
     for idx, merged_df in enumerate(merged_dataframes):
         csv = merged_df.to_csv(index=False)
         st.download_button(label=f"Download Merged CSV {idx + 1}",
                            data=csv,
                            file_name=f'merged_data_{idx + 1}.csv',
                            mime='text/csv')
-
