@@ -48,7 +48,7 @@ if df is not None:
         with col2:
             tc_size = st.number_input(f"TC {i + 1} Size", min_value=0)
         with col3:
-            tc_carico_minimo_tecnico= st.number_input(f"TC {i + 1} Carico minimo tecnico", min_value=0)
+            tc_carico_minimo_tecnico= st.number_input(f"TC {i + 1} Carico minimo tecnico", min_value=0, max_value=100)
         if tc_name and tc_size:
             tc_data.append((tc_name, tc_size, tc_carico_minimo_tecnico))
 
@@ -65,7 +65,7 @@ if df is not None:
         with col2:
             elco_size = st.number_input(f"ELCO {i + 1} Size", min_value=0)
         with col3:
-            elco_carico_minimo_tecnico=st.number_input(f"ELCO {i + 1} Carico minimo tecnico", min_value=0)
+            elco_carico_minimo_tecnico=st.number_input(f"ELCO {i + 1} Carico minimo tecnico", min_value=0, max_value=100)
         if elco_name and elco_size:
             elco_data.append((elco_name, elco_size, elco_carico_minimo_tecnico))
 
