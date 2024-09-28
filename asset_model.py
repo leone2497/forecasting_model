@@ -161,7 +161,7 @@ if dataframes:
             # Calculate 'Rapporto potenza assorbita/pot tot' if applicable (based on 2nd and 3rd columns)
             if merged_df.shape[1] >= 3:
                 merged_df["Rapporto potenza assorbita/pot tot"] = merged_df.iloc[:, 1] / merged_df.iloc[:, 2]
-                merged_df["Fuel/Rapporto potenza assorbita"] = merged_df.iloc[:, 3] / merged_df.iloc[:, 1]
+                merged_df["Fuel/Rapporto potenza assorbita"] = (merged_df.iloc[:, 3]*1000) / merged_df.iloc[:, 1]
 
                 # Create classes for 'Rapporto potenza assorbita/pot tot'
                 merged_df['Class'] = pd.cut(
