@@ -1,5 +1,6 @@
 import pandas as pd
 import streamlit as st
+import itertools
 
 # Set up the Streamlit app
 st.title("Modello forecast degli assetti di centrale to be")
@@ -68,64 +69,51 @@ if df is not None:
     st.write("ELCO DataFrame:")
     st.dataframe(ELCO_df)
 
-    # Step 3: Define the asset generation logic
-    def create_assets(required_power, tc_data, elco_data):
-        """Function to create assets based on required power using ELCO and TC."""
-        total_elco_power = sum([elco[1] for elco in elco_data])  # Sum of ELCO sizes
-        
-        st.write(f"Total ELCO Power: {total_elco_power}")
-        st.write(f"Required Power: {required_power}")
-
-        # Start by using ELCOs
+    # Step 3: Function to generate specific combinations of ELCO and TC machines
+    def generate_combinations(tc_data, elco_data):
+        """Generate specific combinations of ELCO and TC machines."""
         assets = []
-        current_power = 0
-        
-        # Add ELCOs first
-        for elco in elco_data:
-            if current_power + elco[1] <= required_power:
-                assets.append(elco)
-                current_power += elco[1]
-        
-        # If power is not sufficient, add TCs
-        if current_power < required_power:
-            for tc in tc_data:
-                if current_power + tc[1] <= required_power:
-                    assets.append(tc)
-                    current_power += tc[1]
-                if current_power >= required_power:
-                    break
-        
-        st.write(f"Final Power Generated: {current_power}")
-        return assets, current_power
-    
-    # Step 4: Input for required power and generate asset combinations
-    required_power = st.number_input("Enter required power", min_value=1)
 
-    # Initialize the assets variable before the button action
-    assets = []
-    asset_df = pd.DataFrame()
+        # ELCO alone (single and multiple ELCOs)
+        for r in range(1, len(elco_data) + 1):
+            for combo in itertools.combinations(elco_data, r):
+                assets.append(combo)
 
+        # ELCO + TC combinations
+        for elco_r in range(1, len(elco_data) + 1):
+            for elco_combo in itertools.combinations(elco_data, elco_r):
+                for tc_r in range(1, len(tc_data) + 1):
+                    for tc_combo in itertools.combinations(tc_data, tc_r):
+                        assets.append(elco_combo + tc_combo)
+
+        return assets
+
+    # Step 4: Generate asset combinations when the button is clicked
     if st.button("Generate Asset Combinations"):
         if not elco_data:
             st.error("Please enter ELCO data.")
         elif not tc_data:
             st.error("Please enter TC data.")
         else:
-            assets, final_power = create_assets(required_power, tc_data, elco_data)
-            
-            if assets:
-                st.write(f"Asset combination to meet the required power ({required_power}):")
-                asset_df = pd.DataFrame(assets, columns=['Machine', 'Size'])
-                st.dataframe(asset_df)
-            else:
-                st.error("No asset combination could be created. Ensure that the machines can meet the required power.")
-            
-            st.write(f"Total generated power: {final_power}")
+            assets = generate_combinations(tc_data, elco_data)
 
-    # Step 5: Option to download the asset combination
-    if not asset_df.empty:
-        asset_csv = asset_df.to_csv(index=False)
-        st.download_button(label="Download Asset CSV",
-                           data=asset_csv,
-                           file_name='asset_combination.csv',
-                           mime='text/csv')
+            # Step 5: Display asset combinations
+            st.write(f"Total asset combinations generated: {len(assets)}")
+            
+            asset_list = []
+            for idx, asset in enumerate(assets):
+                asset_list.append({
+                    'Combination': f"Asset Combination {idx + 1}",
+                    'Machines': ' + '.join([f"{machine[0]} ({machine[1]} kW)" for machine in asset]),
+                    'Total Power': sum([machine[1] for machine in asset])
+                })
+            
+            asset_df = pd.DataFrame(asset_list)
+            st.dataframe(asset_df)
+
+            # Step 6: Option to download the asset combinations as CSV
+            asset_csv = asset_df.to_csv(index=False)
+            st.download_button(label="Download Asset Combinations CSV",
+                               data=asset_csv,
+                               file_name='asset_combinations.csv',
+                               mime='text/csv')
