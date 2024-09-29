@@ -183,11 +183,11 @@ if dataframes:
             # Display summary DataFrame
             st.write("Summary DataFrame:")
             st.dataframe(summary_df)
-asset_df = pd.concat([TC_df, ELCO_df])
+
 
     # Step 6: Assign machines based on power data
 if hours_data_column in df.columns:
-    df['assigned_machine'] = df[hours_data_column].apply(lambda x: assign_machine(x, asset_df))
+    df['assigned_machine'] = df[hours_data_column].apply(lambda x: assign_machine(x, assets))
     st.write("Assigned Machine DataFrame:")
     st.dataframe(df)
 
