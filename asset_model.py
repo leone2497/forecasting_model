@@ -35,13 +35,24 @@ file_to_analyze = st.file_uploader("Choose a CSV or Excel file", type=["csv", "x
 # Function to assign machines based on power demand and asset combinations
 def assign_machine(power_hour, asset_combinations):
     """Assigns a suitable machine based on power demand and asset combinations."""
+    
     for asset in asset_combinations:
-        total_power = sum(machine[1] for machine in asset)
-        if power_hours <= ELCO_df[1]:
-            return ELCO_df[0]
+        total_power = sum(machine[1] for machine in asset)  # Calculate total power of the asset
+        
+        # Check if power_hour is less than or equal to ELCO power ratings
+        if power_hour <= ELCO_df[1]:  
+            return ELCO_df[0]  # Return names of all ELCO machines (assuming ELCO_df[0] holds names)
+        
+        # Check if the total power of the current asset meets the power demand
         elif total_power >= power_hour:
-            return ' + '.join([machine[0] for machine in asset])  # Return the names of the machines in the combination
-    return 'No suitable machine'
+            residual_power = power_hour - 0.8 * TC_df[1]  # Calculate residual power
+            
+            # Check if the residual power can be satisfied by ELCO machines
+            if residual_power <= ELCO_df * 0.3:
+                return ' + '.join([machine[0] for machine in asset])  # Return names of the machines in the combination
+            
+    return 'No suitable machine'  # If no suitable combination is found
+
 
 # File handling and initial dataframe setup
 df = None
