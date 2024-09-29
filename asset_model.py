@@ -34,25 +34,26 @@ file_to_analyze = st.file_uploader("Choose a CSV or Excel file", type=["csv", "x
 
 # Function to assign machines based on power demand and asset combinations
 # Function to assign machines based on power demand and asset combinations
-def assign_machine(power_hour, elco_df, tc_df=None):
+def assign_machine(power_hour, asset_combinations, ELCO_df=None, TC_df=None):
     try:
-        # Step 1: Attempt to meet power demand with only ELCO machines
-        suitable_elco = elco_df[elco_df['Size (kW)'] >= power_hour]
-        if not suitable_elco.empty:
-            # Return the ELCO machine(s) that meet the power demand
-            return ' + '.join(suitable_elco['Machine'].tolist())
+        if ELCO_df is None or ELCO_df.empty or TC_df is None or TC_df.empty:
+            return "No machine data available"
         
-        # Step 2: If no ELCO machine(s) can meet the demand, try ELCO + TC combinations
-        for tc_idx, tc_row in tc_df.iterrows():
-            for elco_idx, elco_row in elco_df.iterrows():
-                total_power = elco_row['Size (kW)'] + tc_row['Size (kW)']
-                if total_power >= power_hour:
-                    return f"{elco_row['Machine']} + {tc_row['Machine']}"
+        for asset in asset_combinations:
+            total_power = sum(machine[1] for machine in asset)  # Sum up power
+            
+            # Check if power_hour is less than or equal to the ELCO power ratings
+            if power_hour <= ELCO_df['Size (kW)'].max():
+                suitable_elco = ELCO_df[ELCO_df['Size (kW)'] >= power_hour]
+                if not suitable_elco.empty:
+                    return ' + '.join(suitable_elco['Machine'].tolist())
 
-        return "No suitable machine"  # If no combination is found
-    except Exception as e:
-        st.error(f"Error in assign_machine: {e}")
-        return None
+            # If total power of asset is greater than or equal to power_hour
+            elif total_power >= power_hour:
+                residual_power = power_hour - 0.8 * TC_df['Size (kW)'].max()
+                elco_power_limit = ELCO_df['Size (kW)'] * 0.3
+                if any(residual_power <= limit for limit in elco_power_limit):
+                    return ' + '.join([machine[0] for machine in asset])
 
 
 # File handling and initial DataFrame setup
