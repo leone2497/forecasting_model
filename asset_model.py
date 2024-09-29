@@ -3,21 +3,22 @@ import streamlit as st
 import itertools
 
 # Set up the Streamlit app
-st.title("Modello forecast degli assetti di centrale to be")
+st.title("Modello forecast degli assetti di centrale")
 st.sidebar.title("Functions")
 
 # Step 1: File uploader for CSV or Excel files
 file_to_analyze = st.file_uploader("Choose a CSV or Excel file", type=["csv", "xls", "xlsx"])
 
-# Function to assign machine based on power requirement
+# Function to assign machines based on power demand
 def assign_machine(power_hour, machines):
     # Check which machines can satisfy the power requirement
-    suitable_machine = machines[machines['power_capacity'] >= power_hour]
+    suitable_machine = machines[machines['Size (kW)'] >= power_hour]  # Corrected column name
     if not suitable_machine.empty:
         # Return the first suitable machine (smallest one that can handle the power)
-        return suitable_machine.iloc[0]['machine']
+        return suitable_machine.iloc[0]['Machine']
     return 'No suitable machine'
 
+# File handling and initial dataframe setup
 df = None
 if file_to_analyze is not None:
     try:
@@ -38,8 +39,8 @@ if file_to_analyze is not None:
 # Check if a DataFrame has been uploaded before proceeding
 if df is not None:
     # Sidebar selections for power and date-time columns
-    hours_data_column = st.sidebar.selectbox("Indicate the power column", df.columns.tolist())
-    time_column = st.sidebar.selectbox("Indicate the date time column", df.columns.tolist())
+    hours_data_column = st.sidebar.selectbox("Select the power column", df.columns.tolist())
+    time_column = st.sidebar.selectbox("Select the date-time column", df.columns.tolist())
 
     # Step 2: Handle user input for TC and ELCO data entry
     st.sidebar.write("Enter TC and ELCO Data:")
@@ -82,22 +83,67 @@ if df is not None:
     st.write("ELCO DataFrame:")
     st.dataframe(ELCO_df)
 
-    # Combine ELCO and TC machines into a single DataFrame
-    asset_df = pd.concat([TC_df[['Machine', 'Size (kW)']], ELCO_df[['Machine', 'Size (kW)']]])
-    asset_df.rename(columns={'Size (kW)': 'power_capacity'}, inplace=True)
+    # Step 3: Generate asset combinations (ELCO and TC)
+    def generate_combinations(tc_data, elco_data):
+        """Generate specific combinations of ELCO and TC machines."""
+        assets = []
 
-    # Step 3: Generate asset combinations (already handled in your code)
+        # ELCO alone (single and multiple ELCOs)
+        for r in range(1, len(elco_data) + 1):
+            for combo in itertools.combinations(elco_data, r):
+                assets.append(combo)
 
-    # Step 4: Assign machine based on power requirements
-    if hours_data_column:
+        # ELCO + TC combinations
+        for elco_r in range(1, len(elco_data) + 1):
+            for elco_combo in itertools.combinations(elco_data, elco_r):
+                for tc_r in range(1, len(tc_data) + 1):
+                    for tc_combo in itertools.combinations(tc_data, tc_r):
+                        assets.append(elco_combo + tc_combo)
+
+        return assets
+
+    # Step 4: Generate asset combinations when the button is clicked
+    if st.button("Generate Asset Combinations"):
+        if not elco_data:
+            st.error("Please enter ELCO data.")
+        elif not tc_data:
+            st.error("Please enter TC data.")
+        else:
+            # Generate combinations
+            assets = generate_combinations(tc_data, elco_data)
+
+            # Display asset combinations
+            st.write(f"Total asset combinations generated: {len(assets)}")
+            asset_list = []
+            for idx, asset in enumerate(assets):
+                asset_list.append({
+                    'Combination': f"Asset Combination {idx + 1}",
+                    'Machines': ' + '.join([f"{machine[0]} ({machine[1]} kW)" for machine in asset]),
+                    'Total Power (kW)': sum([machine[1] for machine in asset])
+                })
+            
+            asset_df = pd.DataFrame(asset_list)
+            st.dataframe(asset_df)
+
+            # Option to download the asset combinations as CSV
+            asset_csv = asset_df.to_csv(index=False)
+            st.download_button(label="Download Asset Combinations CSV",
+                               data=asset_csv,
+                               file_name='asset_combinations.csv',
+                               mime='text/csv')
+
+    # Step 5: Combine ELCO and TC data
+    asset_df = pd.concat([TC_df, ELCO_df])
+
+    # Step 6: Assign machines based on power data
+    if hours_data_column in df.columns:
         df['assigned_machine'] = df[hours_data_column].apply(lambda x: assign_machine(x, asset_df))
-
-        st.write("Updated DataFrame with Assigned Machines:")
+        st.write("Assigned Machine DataFrame:")
         st.dataframe(df)
 
-        # Step 5: Option to download the updated DataFrame with machine assignments
-        csv_output = df.to_csv(index=False)
-        st.download_button(label="Download Updated Data with Machines",
-                           data=csv_output,
-                           file_name='updated_data_with_machines.csv',
+        # Option to download the DataFrame with assigned machines
+        assigned_machine_csv = df.to_csv(index=False)
+        st.download_button(label="Download Data with Assigned Machines",
+                           data=assigned_machine_csv,
+                           file_name='assigned_machines.csv',
                            mime='text/csv')
