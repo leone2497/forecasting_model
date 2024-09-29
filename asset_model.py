@@ -11,7 +11,6 @@ file_to_analyze = st.file_uploader("Choose a CSV or Excel file", type=["csv", "x
 
 # Function to assign machines based on power demand
 def assign_machine(power_hour, machines):
-    # Check which machines can satisfy the power requirement
     suitable_machine = machines[machines['Size (kW)'] >= power_hour]
     if not suitable_machine.empty:
         return suitable_machine.iloc[0]['Machine']
@@ -177,4 +176,10 @@ if dataframes:
             # Group by 'Class' and calculate the mean for each class
             summary_df = merged_df.groupby('Class').agg(
                 Lim_inf=('Rapporto potenza assorbita/pot tot', lambda x: x.min() * 100),  # Lower limit of the class
-                Lim_sup=('Rapporto potenza assorbita/pot tot', lambda x: x.max() * 100),  # Upper limit of
+                Lim_sup=('Rapporto potenza assorbita/pot tot', lambda x: x.max() * 100),  # Upper limit of the class
+                Rapporto_fuel=('Fuel/Rapporto potenza assorbita', 'mean')  # Mean fuel ratio
+            ).reset_index()  # Reset index for better display
+
+            # Display summary DataFrame
+            st.write("Summary DataFrame:")
+            st.dataframe(summary_df)
