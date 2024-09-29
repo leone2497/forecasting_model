@@ -78,7 +78,7 @@ if df is not None:
     st.write("ELCO DataFrame:")
     st.dataframe(ELCO_df)
 
-    # Step 3: Generate asset combinations (ELCO and TC) for power requirements
+    # Step 3: Generate asset combinations (ELCO and TC)
     def generate_combinations(tc_data, elco_data):
         assets = []
 
@@ -108,12 +108,10 @@ if df is not None:
             st.write(f"Total asset combinations generated: {len(assets)}")
             asset_list = []
             for idx, asset in enumerate(assets):
-                total_power = sum([machine[1] for machine in asset])
                 asset_list.append({
                     'Combination': f"Asset Combination {idx + 1}",
                     'Machines': ' + '.join([f"{machine[0]} ({machine[1]} kW)" for machine in asset]),
-                    'Total Power (kW)': total_power,
-                    'Meets Power Requirement': "Yes" if total_power >= df[hours_data_column].max() else "No"  # Check against max power requirement
+                    'Total Power (kW)': sum([machine[1] for machine in asset])
                 })
             
             asset_df = pd.DataFrame(asset_list)
@@ -180,4 +178,8 @@ if dataframes:
                 Lim_inf=('Rapporto potenza assorbita/pot tot', lambda x: x.min() * 100),  # Lower limit of the class
                 Lim_sup=('Rapporto potenza assorbita/pot tot', lambda x: x.max() * 100),  # Upper limit of the class
                 Rapporto_fuel=('Fuel/Rapporto potenza assorbita', 'mean')  # Mean fuel ratio
-            ).reset_index()  #
+            ).reset_index()  # Reset index for better display
+
+            # Display summary DataFrame
+            st.write("Summary DataFrame:")
+            st.dataframe(summary_df)
