@@ -177,9 +177,4 @@ if dataframes:
             # Group by 'Class' and calculate the mean for each class
             summary_df = merged_df.groupby('Class').agg(
                 Lim_inf=('Rapporto potenza assorbita/pot tot', lambda x: x.min() * 100),  # Lower limit of the class
-                Lim_sup=('Rapporto potenza assorbita/pot tot', lambda x: x.max() * 100),  # Upper limit of the class
-                Rapporto_fuel=('Fuel/Rapporto potenza assorbita', 'mean')  # Average 'Fuel/Rapporto potenza assorbita'
-            ).reset_index()
-
-            # Rename the columns for clarity
-            summary_df.columns = ['Fasce di carico', 'Lim inf', 'Lim sup', 'Rapporto fuel -
+                Lim_sup=('Rapporto potenza assorbita/pot tot', lambda x: x.max() * 100),  # Upper limit of
