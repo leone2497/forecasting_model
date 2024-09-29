@@ -18,6 +18,7 @@ def handle_machine_input(machine_type, n):
             size = st.number_input(f"{machine_type} {i + 1} Size (kW)", min_value=0)
         with col3:
             min_load = st.number_input(f"{machine_type} {i + 1} Min Technical Load (%)", min_value=0, max_value=100)
+            min_load = min_load/100
         if name and size:
             data.append((name, size, min_load))
     return pd.DataFrame(data, columns=['Machine', 'Size (kW)', 'Min Technical Load (%)'])
