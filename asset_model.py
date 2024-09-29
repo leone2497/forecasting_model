@@ -37,7 +37,7 @@ def assign_machine(power_hour, asset_combinations):
     """Assigns a suitable machine based on power demand and asset combinations."""
     for asset in asset_combinations:
         total_power = sum(machine[1] for machine in asset)
-        if power_hours <=
+        if power_hours <= max(ELCO_df[1])
         if total_power >= power_hour:
             return ' + '.join([machine[0] for machine in asset])  # Return the names of the machines in the combination
     return 'No suitable machine'
