@@ -18,7 +18,7 @@ def handle_machine_input(machine_type, n):
             size = st.number_input(f"{machine_type} {i + 1} Size (kW)", min_value=0)
         with col3:
             min_load = st.number_input(f"{machine_type} {i + 1} Min Technical Load (%)", min_value=0, max_value=100)
-            min_load = min_load / 100  # Convert to a decimal
+            min_load = min_load / 100
         if name and size:
             data.append((name, size, min_load))
     return pd.DataFrame(data, columns=['Machine', 'Size (kW)', 'Min Technical Load (%)'])
@@ -29,34 +29,31 @@ def display_data_frame(df, title):
     st.write(title)
     st.dataframe(df)
 
-# Step 1: File uploader for CSV or Excel files
+# File uploader for CSV or Excel files
 file_to_analyze = st.file_uploader("Choose a CSV or Excel file", type=["csv", "xls", "xlsx"])
 
 # Function to assign machines based on power demand and asset combinations
-# Function to assign machines based on power demand and asset combinations
-def assign_machine(power_hour, asset_combinations, ELCO_df=None, TC_df=None):
+def assign_machine(power_hour, elco_df, tc_df=None):
     try:
-        if ELCO_df is None or ELCO_df.empty or TC_df is None or TC_df.empty:
-            return "No machine data available"
+        # Step 1: Try to meet power demand with only ELCO machines
+        suitable_elco = elco_df[elco_df['Size (kW)'] >= power_hour]
+        if not suitable_elco.empty:
+            # Return ELCO machine(s) that meet the power demand
+            return ' + '.join(suitable_elco['Machine'].tolist())
         
-        for asset in asset_combinations:
-            total_power = sum(machine[1] for machine in asset)  # Sum up power
-            
-            # Check if power_hour is less than or equal to the ELCO power ratings
-            if power_hour <= ELCO_df['Size (kW)'].max():
-                suitable_elco = ELCO_df[ELCO_df['Size (kW)'] >= power_hour]
-                if not suitable_elco.empty:
-                    return ' + '.join(suitable_elco['Machine'].tolist())
+        # Step 2: If no suitable ELCO, try ELCO + TC combinations
+        for tc_idx, tc_row in tc_df.iterrows():
+            for elco_idx, elco_row in elco_df.iterrows():
+                total_power = elco_row['Size (kW)'] + tc_row['Size (kW)']
+                if total_power >= power_hour:
+                    return f"{elco_row['Machine']} + {tc_row['Machine']}"
 
-            # If total power of asset is greater than or equal to power_hour
-            elif total_power >= power_hour:
-                residual_power = power_hour - 0.8 * TC_df['Size (kW)'].max()
-                elco_power_limit = ELCO_df['Size (kW)'] * 0.3
-                if any(residual_power <= limit for limit in elco_power_limit):
-                    return ' + '.join([machine[0] for machine in asset])
+        return "No suitable machine"  # If no match found
+    except Exception as e:
+        st.error(f"Error in assign_machine: {e}")
+        return None
 
-
-# File handling and initial DataFrame setup
+# File handling and initial dataframe setup
 df = None
 if file_to_analyze is not None:
     try:
@@ -64,11 +61,11 @@ if file_to_analyze is not None:
             df = pd.read_csv(file_to_analyze)
         else:
             df = pd.read_excel(file_to_analyze, engine="openpyxl")
-        
+
         st.write("Available columns:", df.columns.tolist())
         st.write("Preview of DataFrame:")
         st.dataframe(df.head())
-    
+
     except Exception as e:
         st.error(f"Error reading the file: {e}")
 
@@ -77,7 +74,7 @@ if df is not None:
     hours_data_column = st.sidebar.selectbox("Select the power column", df.columns.tolist())
     time_column = st.sidebar.selectbox("Select the date-time column", df.columns.tolist())
 
-    # Step 2: Handle user input for TC and ELCO data entry
+    # Handle user input for TC and ELCO data entry
     st.sidebar.write("Enter TC and ELCO Data:")
     n_tc = st.number_input("Enter number of TC", min_value=1, value=1)
     n_elco = st.number_input("Enter number of ELCO", min_value=1, value=1)
@@ -89,7 +86,7 @@ if df is not None:
     display_data_frame(TC_df, "TC DataFrame:")
     display_data_frame(ELCO_df, "ELCO DataFrame:")
 
-    # Step 3: Generate asset combinations (ELCO and TC)
+    # Generate asset combinations (ELCO and TC)
     def generate_combinations(tc_data, elco_data):
         assets = []
         # ELCO alone (single and multiple ELCOs)
@@ -106,7 +103,7 @@ if df is not None:
 
         return assets
 
-    # Step 4: Generate asset combinations when the button is clicked
+    # Button to generate asset combinations
     if st.button("Generate Asset Combinations"):
         if ELCO_df.empty:
             st.error("Please enter ELCO data.")
@@ -114,8 +111,9 @@ if df is not None:
             st.error("Please enter TC data.")
         else:
             assets = generate_combinations(TC_df.values, ELCO_df.values)
-
             st.write(f"Total asset combinations generated: {len(assets)}")
+
+            # Create and display asset combination DataFrame
             asset_list = []
             for idx, asset in enumerate(assets):
                 asset_list.append({
@@ -123,7 +121,6 @@ if df is not None:
                     'Machines': ' + '.join([f"{machine[0]} ({machine[1]} kW)" for machine in asset]),
                     'Total Power (kW)': sum([machine[1] for machine in asset])
                 })
-            
             asset_df = pd.DataFrame(asset_list)
             display_data_frame(asset_df, "Asset Combinations")
 
@@ -134,16 +131,16 @@ if df is not None:
                                file_name='asset_combinations.csv',
                                mime='text/csv')
 
-    # Step 5: Assign machines based on power data
+    # Step to assign machines based on power data
     if hours_data_column in df.columns:
-        assets = generate_combinations(TC_df.values, ELCO_df.values)
-        assigned_machines = df[hours_data_column].apply(lambda x: assign_machine(x, assets, ELCO_df, TC_df))
-        df['assigned_machine'] = assigned_machines
-        display_data_frame(df, "Assigned Machine DataFrame")
+        if st.button("Assign Machines"):
+            assigned_machines = df[hours_data_column].apply(lambda x: assign_machine(x, ELCO_df, TC_df))
+            df['assigned_machine'] = assigned_machines
+            display_data_frame(df, "Assigned Machine DataFrame")
 
-        # Option to download the DataFrame with assigned machines
-        assigned_machine_csv = df.to_csv(index=False)
-        st.download_button(label="Download Assigned Machine DataFrame CSV",
-                           data=assigned_machine_csv,
-                           file_name='assigned_machine_data.csv',
-                           mime='text/csv')
+            # Option to download the DataFrame with assigned machines
+            assigned_machine_csv = df.to_csv(index=False)
+            st.download_button(label="Download Assigned Machines CSV",
+                               data=assigned_machine_csv,
+                               file_name='assigned_machines.csv',
+                               mime='text/csv')
