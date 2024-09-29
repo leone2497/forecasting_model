@@ -34,20 +34,35 @@ file_to_analyze = st.file_uploader("Choose a CSV or Excel file", type=["csv", "x
 
 # Function to assign machines based on power demand and asset combinations
 def assign_machine(power_hour, asset_combinations, elco_df, tc_df):
-    """Assigns a suitable machine based on power demand and asset combinations."""
+    """Assigns a suitable machine based on power demand using a hierarchical approach."""
     
-    # Step 1: Try to meet power demand with only ELCO machines
-    suitable_elco = elco_df[elco_df['Size (kW)'] >= power_hour]
-    if not suitable_elco.empty:
-        return ' + '.join(suitable_elco['Machine'].tolist())
-    
-    # Step 2: If no suitable ELCO, try ELCO + TC combinations
+    # Step 1: Try to meet power demand with a single ELCO machine
+    suitable_single_elco = elco_df[elco_df['Size (kW)'] >= power_hour]
+    if not suitable_single_elco.empty:
+        return suitable_single_elco.iloc[0]['Machine']  # Return the first ELCO that meets the demand
+
+    # Step 2: Try to meet power demand with a combination of multiple ELCO machines
+    elco_combinations = []
+    for r in range(1, len(elco_df) + 1):
+        # Generate all combinations of ELCOs up to the length of the available ELCOs
+        for combo in itertools.combinations(elco_df.values, r):
+            total_elco_power = sum(machine[1] for machine in combo)
+            if total_elco_power >= power_hour:
+                elco_combinations.append(combo)
+
+    # If any combination of ELCOs meets the demand, return the smallest one
+    if elco_combinations:
+        smallest_combo = min(elco_combinations, key=lambda x: sum(machine[1] for machine in x))
+        return ' + '.join([machine[0] for machine in smallest_combo])  # Return machine names in the smallest combination
+
+    # Step 3: If no suitable ELCO combination, try combinations of ELCO + TC machines
     for asset in asset_combinations:
         total_power = sum(machine[1] for machine in asset)  # Calculate total power of the asset
         if total_power >= power_hour:
             return ' + '.join([machine[0] for machine in asset])  # Return names of the machines in the combination
 
     return 'No suitable machine'  # If no suitable combination is found
+
 
 # File handling and initial dataframe setup
 df = None
