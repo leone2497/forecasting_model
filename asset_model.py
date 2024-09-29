@@ -8,6 +8,13 @@ st.sidebar.title("Functions")
 
 # Step 1: File uploader for CSV or Excel files
 file_to_analyze = st.file_uploader("Choose a CSV or Excel file", type=["csv", "xls", "xlsx"])
+def assign_machine(power_hour, machines):
+    # Check which machines can satisfy the power requirement
+    suitable_machine = machines[machines['power_capacity'] >= power_hour]
+    if not suitable_machine.empty:
+        # Return the first suitable machine (smallest one that can handle the power)
+        return suitable_machine.iloc[0]['machine']
+    return 'No suitable machine'
 
 df = None
 if file_to_analyze is not None:
@@ -201,3 +208,7 @@ if dataframes:
                            data=csv,
                            file_name=f'merged_data_{idx + 1}.csv',
                            mime='text/csv')
+assign_machine(hours_data, asset_[:,3])
+    
+    
+    
