@@ -33,29 +33,30 @@ def display_data_frame(df, title):
 file_to_analyze = st.file_uploader("Choose a CSV or Excel file", type=["csv", "xls", "xlsx"])
 
 # Function to assign machines based on power demand and asset combinations
-def assign_machine(power_hour, asset_combinations, ELCO_df, TC_df):
-    """Assigns a suitable machine based on power demand and asset combinations."""
-    
-    for asset in asset_combinations:
-        total_power = sum(machine[1] for machine in asset)  # Calculate total power of the asset
+def assign_machine(power_hour, asset_combinations, ELCO_df=None, TC_df=None):
+    try:
+        for asset in asset_combinations:
+            total_power = sum(machine[1] for machine in asset)  # Sum up power
+            
+            # Check if power_hour is less than or equal to the ELCO power ratings
+            if power_hour <= ELCO_df['Size (kW)'].max():
+                suitable_elco = ELCO_df[ELCO_df['Size (kW)'] >= power_hour]
+                if not suitable_elco.empty:
+                    return ' + '.join(suitable_elco['Machine'].tolist())
+
+            # If total power of asset is greater than or equal to power_hour
+            elif total_power >= power_hour:
+                residual_power = power_hour - 0.8 * TC_df['Size (kW)'].max()
+                elco_power_limit = ELCO_df['Size (kW)'] * 0.3
+                if any(residual_power <= limit for limit in elco_power_limit):
+                    return ' + '.join([machine[0] for machine in asset])
         
-        # Check if power_hour is less than or equal to the maximum power rating of ELCO machines
-        if power_hour <= ELCO_df['Size (kW)'].max():  
-            # Find the ELCO machine(s) that can handle the power hour requirement
-            suitable_elco = ELCO_df[ELCO_df['Size (kW)'] >= power_hour]
-            if not suitable_elco.empty:
-                return ' + '.join(suitable_elco['Machine'].tolist())  # Return the names of suitable ELCO machines
+        return "No suitable machine"  # Return default if no match found
+    
+    except Exception as e:
+        st.error(f"Error in assign_machine: {e}")
+        return None
 
-        # If the total power of the asset meets the power requirement
-        elif total_power >= power_hour:
-            residual_power = power_hour - 0.8 * TC_df['Size (kW)'].max()  # Calculate residual power
-
-            # Check if the residual power can be met by 30% of the ELCO machines' capacity
-            elco_power_limit = ELCO_df['Size (kW)'] * 0.3
-            if any(residual_power <= elco_limit for elco_limit in elco_power_limit):
-                return ' + '.join([machine[0] for machine in asset])  # Return the names of machines in the asset
-
-    return 'No suitable machine'  # If no suitable combination is found
 
 
 
