@@ -184,4 +184,5 @@ if df is not None:
 
         # Option to download the DataFrame with assigned machines
         assigned_machine_csv = df.to_csv(index=False)
-        st.download_button(label
+        st.download_button(label="Download Data with Assigned Machines",
+                           data=assigned_machine
