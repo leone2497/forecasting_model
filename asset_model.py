@@ -194,6 +194,6 @@ if hours_data_column in df.columns:
         # Option to download the DataFrame with assigned machines
     assigned_machine_csv = df.to_csv(index=False)
     st.download_button(label="Download Data with Assigned Machines",
-                       data=assigned_machine_csv
+                       data=assigned_machine_csv,
                        file_name='assigned_machines.csv',
                        mime='text/csv')
