@@ -119,8 +119,7 @@ if df is not None:
         if tc_name and size:
             # Append the machine name and fixed load to the list
             tc_fixed_load.append((tc_name, fixed_load))
-
-    return pd.DataFrame(tc_fixed_load, columns=['Machine', 'Size (kW) Carico Fisso'])
+            pd.DataFrame(tc_fixed_load, columns=['Machine', 'Size (kW) Carico Fisso'])
     display_data_frame(tc_fixed_load, "TC DataFrame:")
     display_data_frame(ELCO_df, "ELCO DataFrame:")
 
