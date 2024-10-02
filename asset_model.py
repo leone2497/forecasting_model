@@ -123,7 +123,7 @@ if df is not None:
 
     # Display the input DataFrames
     display_data_frame(TC_df, "TC DataFrame:")
-     tc_fixed_load = []  # List to store TC machines with fixed load
+    tc_fixed_load = []  # List to store TC machines with fixed load
 
     for i in range(n_tc):
         col1, col2 = st.columns(2)
