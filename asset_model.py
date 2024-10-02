@@ -6,17 +6,35 @@ import itertools
 st.title("Modello forecast degli assetti di centrale")
 st.sidebar.title("Functions")
 # Function to handle machine input for TC carico fisso
-def habdle_machine_input_with_carico_fisso(tc_dataframe):
-    tc_carico_fisso=[]
+import pandas as pd
+import streamlit as st
+
+def handle_machine_input_with_carico_fisso(n_tc):
+    """Handles input for TC machines with fixed load."""
+    tc_carico_fisso = []  # List to store TC machines with fixed load
+
     for i in range(n_tc):
-        col1, col2= st.columns(2)
+        col1, col2 = st.columns(2)
+        
         with col1:
-            tc=TC_df[0]
+            # Input for TC machine name
+            tc_name = st.text_input(f"TC {i + 1} Name")
+        
         with col2:
-            power_carico_fisso=TC_df[1]*(TC_df[2]/100)
-        if tc and power_carico_fisso:
-            tc_carico_fisso.append((tc, power_carico_fisso))
- return pd.DataFrame(tc_carico_fisso, columns=['Machine', 'Size (kW) cairco fisso'])
+            # Input for TC machine size
+            size = st.number_input(f"TC {i + 1} Size (kW)", min_value=0)
+            # Input for minimum technical load
+            min_load = st.number_input(f"TC {i + 1} Min Technical Load (%)", min_value=0, max_value=100)
+            # Calculate fixed load based on the input
+            fixed_load = size * (min_load / 100) if size > 0 else 0
+        
+        if tc_name and size:
+            # Append the machine name and fixed load to the list
+            tc_carico_fisso.append((tc_name, fixed_load))
+    
+    # Create and return a DataFrame from the collected data
+    return pd.DataFrame(tc_carico_fisso, columns=['Machine', 'Size (kW) Carico Fisso'])
+
 
 
 # Function to handle machine input for TC and ELCO
