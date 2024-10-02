@@ -125,7 +125,7 @@ if df is not None:
     display_data_frame(TC_df, "TC DataFrame:")
     tc_fixed_load = []  # List to store TC machines with fixed load
 
-    for i in range(n_tc):
+    for i in range(len(TC_df.columns)):
         col1, col2 = st.columns(2)
 
         with col1:
@@ -144,7 +144,7 @@ if df is not None:
             # Append the machine name and fixed load to the list
             tc_fixed_load.append((tc_name, fixed_load))
 
-        return pd.DataFrame(tc_fixed_load, columns=['Machine', 'Size (kW) Carico Fisso'])
+    return pd.DataFrame(tc_fixed_load, columns=['Machine', 'Size (kW) Carico Fisso'])
     display_data_frame(tc_fixed_load, "TC DataFrame:")
     display_data_frame(ELCO_df, "ELCO DataFrame:")
 
