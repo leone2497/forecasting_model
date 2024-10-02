@@ -193,4 +193,25 @@ if df is not None:
         # Loop through user input to merge DataFrames
         for merge_idx in range(int(num_merged_dfs)):
             st.write(f"### Merged Database {merge_idx + 1}")
-            selected
+            selected_dfs = st.multiselect(f"Select DataFrames to merge for Database {merge_idx + 1}", 
+                                           options=[f"DataFrame {idx + 1}" for idx in range(len(dataframes))])
+            
+            if selected_dfs:
+                selected_dataframes = [dataframes[int(idx.split(' ')[-1]) - 1] for idx in selected_dfs]
+                merged_df = pd.concat(selected_dataframes, axis=0, ignore_index=True)
+                st.dataframe(merged_df)
+                merged_dataframes.append(merged_df)
+            else:
+                st.warning("Please select at least one DataFrame to merge.")
+
+    # Final step: Process the power demand column to assign machines
+    if hours_data_column and time_column:
+        power_demand = df[hours_data_column]
+        assigned_machines = []
+
+        for power_hour in power_demand:
+            machine_assignment = assign_machine(power_hour, assets, ELCO_df.values, TC_df.values)
+            assigned_machines.append(machine_assignment)
+
+        df['Assigned Machines'] = assigned_machines
+        display_data_frame(df, "Final DataFrame with Assigned Machines:")
