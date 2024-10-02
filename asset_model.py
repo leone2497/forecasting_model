@@ -5,6 +5,19 @@ import itertools
 # Set up the Streamlit app
 st.title("Modello forecast degli assetti di centrale")
 st.sidebar.title("Functions")
+# Function to handle machine input for TC carico fisso
+def habdle_machine_input_with_carico_fisso(tc_dataframe):
+    tc_carico_fisso=[]
+    for i in range(n_tc):
+        col1, col2= st.columns(2)
+        with col1:
+            tc=TC_df[0]
+        with col2:
+            power_carico_fisso=TC_df[1]*(TC_df[2]/100)
+        if tc and power_carico_fisso:
+            tc_carico_fisso.append((tc, power_carico_fisso))
+ return pd.DataFrame(data, columns=['Machine', 'Size (kW) cairco fisso'])
+
 
 # Function to handle machine input for TC and ELCO
 def handle_machine_input(machine_type, n):
