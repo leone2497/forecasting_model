@@ -264,8 +264,7 @@ def handle_machine_input_with_carico_fisso(n_tc):
         if tc_name and size:
             # Append the machine name and fixed load to the list
             tc_fixed_load.append((tc_name, fixed_load))
-
-    return pd.DataFrame(tc_fixed_load, columns=['Machine', 'Size (kW) Carico Fisso'])
+            pd.DataFrame(tc_fixed_load, columns=['Machine', 'Size (kW) Carico Fisso'])
 
 # Function to handle machine input for TC and ELCO
 def handle_machine_input(machine_type, n):
