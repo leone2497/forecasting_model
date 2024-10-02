@@ -118,13 +118,14 @@ if df is not None:
     n_tc = st.number_input("Enter number of TC", min_value=1, value=1)
     n_elco = st.number_input("Enter number of ELCO", min_value=1, value=1)
 
-    TC_df = handle_machine_input_tc("TC", n_tc)
+    TC_df, TC_carico_fisso_df = handle_machine_input_tc("TC", n_tc)
     ELCO_df = handle_machine_input("ELCO", n_elco)
 
 
 
     # Display the input DataFrames
     display_data_frame(TC_df, "TC DataFrame:")
+    display_data_frame(TC_carico_fisso_df , "TC DataFrame:")
     display_data_frame(ELCO_df, "ELCO DataFrame:")
 
     # Step 3: Generate asset combinations (ELCO and TC)
