@@ -174,4 +174,18 @@ if df is not None:
 
                     # Create classes for 'Rapporto potenza assorbita/pot tot'
                     merged_df['Class'] = pd.cut(
-                        merged_df["Rapporto potenza assorb
+                        merged_df["Rapporto potenza assorbita/pot tot"],
+                        bins=[0, 30, 50, 70, 100],
+                        labels=["0-30", "30-50", "50-70", "70-100"]
+                    )
+
+                display_data_frame(merged_df, f"Merged DataFrame {merge_idx + 1}")
+
+                # Option to download merged DataFrame as CSV
+                merged_csv = merged_df.to_csv(index=False)
+                st.download_button(label=f"Download Merged DataFrame {merge_idx + 1} CSV",
+                                   data=merged_csv,
+                                   file_name=f'merged_dataframe_{merge_idx + 1}.csv',
+                                   mime='text/csv')
+else:
+    st.warning("Please upload a CSV or Excel file to continue.")
