@@ -16,7 +16,7 @@ def habdle_machine_input_with_carico_fisso(tc_dataframe):
             power_carico_fisso=TC_df[1]*(TC_df[2]/100)
         if tc and power_carico_fisso:
             tc_carico_fisso.append((tc, power_carico_fisso))
- return pd.DataFrame(data, columns=['Machine', 'Size (kW) cairco fisso'])
+ return pd.DataFrame(tc_carico_fisso, columns=['Machine', 'Size (kW) cairco fisso'])
 
 
 # Function to handle machine input for TC and ELCO
