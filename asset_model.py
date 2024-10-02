@@ -352,7 +352,6 @@ if df is not None:
 
     TC_df = handle_machine_input("TC", n_tc)
     ELCO_df = handle_machine_input("ELCO", n_elco)
-    TC_carico_fisso = handle_machine_input_with_carico_fisso(n_tc)
 
     # Display the input DataFrames
     display_data_frame(TC_df, "TC DataFrame:")
