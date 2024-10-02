@@ -5,8 +5,36 @@ import itertools
 # Set up the Streamlit app
 st.title("Modello forecast degli assetti di centrale")
 st.sidebar.title("Functions")
+def handle_machine_input_tc(machine_type, n):
+    """Handles input for TC or ELCO machines."""
+    data = []
+    data_carico_fisso = []
+    for i in range(n):
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            name = st.text_input(f"{machine_type} {i + 1} Name")
+        with col2:
+            size = st.number_input(f"{machine_type} {i + 1} Size (kW)", min_value=0)
+        with col3:
+            min_load = st.number_input(f"{machine_type} {i + 1} Min Technical Load (%)", min_value=0, max_value=100)
+            min_load = min_load / 100  # Convert to a fraction
+        with col4:
+            if size > 0:  # Check to avoid division by zero
+                Carico_fisso = size * min_load
+            else:
+                Carico_fisso = 0  # Set to 0 if size is not provided
 
-# Function to handle machine input for TC and ELCO
+        if name and size > 0:  # Ensure size is greater than 0
+            data.append((name, size, min_load))
+            data_carico_fisso.append((name, Carico_fisso)) 
+    
+    df = pd.DataFrame(data, columns=['Machine', 'Size (kW)', 'Min Technical Load (%)'])
+    df_carico_fisso = pd.DataFrame(data_carico_fisso, columns=['Machine', 'Carico Fisso (kW)'])
+    
+    return df, df_carico_fisso  # Return both DataFrames
+
+
+# Function to handle machine input for ELCO
 def handle_machine_input(machine_type, n):
     """Handles input for TC or ELCO machines."""
     data = []
@@ -90,7 +118,7 @@ if df is not None:
     n_tc = st.number_input("Enter number of TC", min_value=1, value=1)
     n_elco = st.number_input("Enter number of ELCO", min_value=1, value=1)
 
-    TC_df = handle_machine_input("TC", n_tc)
+    TC_df = handle_machine_input_tc("TC", n_tc)
     ELCO_df = handle_machine_input("ELCO", n_elco)
 
 
