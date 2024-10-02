@@ -241,30 +241,6 @@ if df is not None:
 st.title("Modello forecast degli assetti di centrale")
 st.sidebar.title("Functions")
 
-def handle_machine_input_with_carico_fisso(n_tc):
-    """Handles input for TC machines with fixed load."""
-    tc_fixed_load = []  # List to store TC machines with fixed load
-
-    for i in range(n_tc):
-        col1, col2 = st.columns(2)
-
-        with col1:
-            # Input for TC machine name
-            tc_name = st.text_input(f"TC {i + 1} Name")
-
-        with col2:
-            # Input for TC machine size
-            size = st.number_input(f"TC {i + 1} Size (kW)", min_value=0)
-            # Input for minimum technical load
-            min_load = st.number_input(f"TC {i + 1} Min Technical Load (%)", min_value=0, max_value=100)
-            # Calculate fixed load based on the input
-            fixed_load = size * (min_load / 100) if size > 0 else 0
-
-        if tc_name and size:
-            # Append the machine name and fixed load to the list
-            tc_fixed_load.append((tc_name, fixed_load))
-            pd.DataFrame(tc_fixed_load, columns=['Machine', 'Size (kW) Carico Fisso'])
-
 # Function to handle machine input for TC and ELCO
 def handle_machine_input(machine_type, n):
     """Handles input for TC or ELCO machines."""
