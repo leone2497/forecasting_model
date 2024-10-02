@@ -94,30 +94,9 @@ if df is not None:
     ELCO_df = handle_machine_input("ELCO", n_elco)
 
 
-    for i in range(len(TC_df.columns)):
-        col1, col2 = st.columns(2)
-
-        with col1:
-            # Input for TC machine name
-            tc_name = st.text_input(f"TC {i + 1} Name")
-
-        with col2:
-            # Input for TC machine size
-            size = st.number_input(f"TC {i + 1} Size (kW)", min_value=0)
-            # Input for minimum technical load
-            min_load = st.number_input(f"TC {i + 1} Min Technical Load (%)", min_value=0, max_value=100)
-            # Calculate fixed load based on the input
-            fixed_load = size * (min_load) if size > 0 else 0
-
-        if tc_name and size:
-            # Append the machine name and fixed load to the list
-            tc_fixed_load.append((tc_name, fixed_load))
-            tc_fixed_load=pd.DataFrame(tc_fixed_load, columns=['Machine', 'Size (kW) Carico Fisso'])
-
 
     # Display the input DataFrames
     display_data_frame(TC_df, "TC DataFrame:")
-    display_data_frame(tc_fixed_load, "TC DataFrame:")
     display_data_frame(ELCO_df, "ELCO DataFrame:")
 
     # Step 3: Generate asset combinations (ELCO and TC)
