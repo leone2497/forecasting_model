@@ -6,33 +6,8 @@ import itertools
 st.title("Modello forecast degli assetti di centrale")
 st.sidebar.title("Functions")
 
-def handle_machine_input_with_carico_fisso(n_tc):
-    """Handles input for TC machines with fixed load."""
-    tc_fixed_load = []  # List to store TC machines with fixed load
-
-    for i in range(n_tc):
-        col1, col2 = st.columns(2)
-
-        with col1:
-            # Input for TC machine name
-            tc_name = st.text_input(f"TC {i + 1} Name")
-
-        with col2:
-            # Input for TC machine size
-            size = st.number_input(f"TC {i + 1} Size (kW)", min_value=0)
-            # Input for minimum technical load
-            min_load = st.number_input(f"TC {i + 1} Min Technical Load (%)", min_value=0, max_value=100)
-            # Calculate fixed load based on the input
-            fixed_load = size * (min_load / 100) if size > 0 else 0
-
-        if tc_name and size:
-            # Append the machine name and fixed load to the list
-            tc_fixed_load.append((tc_name, fixed_load))
-
-    return pd.DataFrame(tc_fixed_load, columns=['Machine', 'Size (kW) Carico Fisso'])
-
-def handle_machine_input(machine_type, n):
-    """Handles input for TC or ELCO machines."""
+def handle_machine_input(machine_type, n, fixed_load=False):
+    """Handles input for TC or ELCO machines with an optional fixed load."""
     data = []
     for i in range(n):
         col1, col2, col3 = st.columns(3)
@@ -41,10 +16,17 @@ def handle_machine_input(machine_type, n):
         with col2:
             size = st.number_input(f"{machine_type} {i + 1} Size (kW)", min_value=0)
         with col3:
-            min_load = st.number_input(f"{machine_type} {i + 1} Min Technical Load (%)", min_value=0, max_value=100) / 100
+            if fixed_load:
+                min_load = st.number_input(f"{machine_type} {i + 1} Min Technical Load (%)", min_value=0, max_value=100)
+                fixed_load_value = size * (min_load / 100) if size > 0 else 0
+            else:
+                min_load = st.number_input(f"{machine_type} {i + 1} Min Technical Load (%)", min_value=0, max_value=100) / 100
+                fixed_load_value = None
+
         if name and size:
-            data.append((name, size, min_load))
-    return pd.DataFrame(data, columns=['Machine', 'Size (kW)', 'Min Technical Load (%)'])
+            data.append((name, size, min_load, fixed_load_value))
+    columns = ['Machine', 'Size (kW)', 'Min Technical Load (%)', 'Carico Fisso'] if fixed_load else ['Machine', 'Size (kW)', 'Min Technical Load (%)']
+    return pd.DataFrame(data, columns=columns)
 
 def display_data_frame(df, title):
     """Display a DataFrame with a title."""
@@ -82,7 +64,7 @@ if df is not None:
 
     TC_df = handle_machine_input("TC", n_tc)
     ELCO_df = handle_machine_input("ELCO", n_elco)
-    TC_fixed_load_df = handle_machine_input_with_carico_fisso(n_tc)
+    TC_fixed_load_df = handle_machine_input("TC", n_tc, fixed_load=True)
 
     # Display the input DataFrames
     display_data_frame(TC_df, "TC DataFrame:")
@@ -167,8 +149,8 @@ if df is not None:
                 dfs_to_merge = [dataframes[i] for i in selected_dfs]
                 merged_df = pd.concat(dfs_to_merge, ignore_index=True)
 
-                # Calculate 'Rapporto potenza assorbita/pot tot' if applicable
-                if merged_df.shape[1] >= 3:
+                # Check if there are enough columns for calculations
+                if merged_df.shape[1] >= 4:  # Adjust index as necessary based on your DataFrame structure
                     merged_df["Rapporto potenza assorbita/pot tot"] = merged_df.iloc[:, 1] / merged_df.iloc[:, 2]
                     merged_df["Fuel/Rapporto potenza assorbita"] = (merged_df.iloc[:, 3] * 1000) / merged_df.iloc[:, 1]
 
