@@ -16,8 +16,8 @@ def handle_machine_input_tc(machine_type, n):
         with col2:
             size = st.number_input(f"{machine_type} {i + 1} Size (kW)", min_value=0)
         with col3:
-            min_load = st.number_input(f"{machine_type} {i + 1} Fixed Technical Load (%)", min_value=0, max_value=100)
-            min_load = fix_load / 100  # Convert to a fraction
+            fix_load = st.number_input(f"{machine_type} {i + 1} Fixed Technical Load (%)", min_value=0, max_value=100)
+            fix_load = fix_load / 100  # Convert to a fraction
         with col4:
             if size > 0:  # Check to avoid division by zero
                 Carico_fisso = size * fix_load
@@ -29,7 +29,7 @@ def handle_machine_input_tc(machine_type, n):
             
 
         if name and size > 0:  # Ensure size is greater than 0
-            data.append((name, size, min_load))
+            data.append((name, size, min_load, fix_load))
             data_carico_fisso.append((name, Carico_fisso)) 
     
     df = pd.DataFrame(data, columns=['Machine', 'Size (kW)', 'Min Technical Load (%)'])
