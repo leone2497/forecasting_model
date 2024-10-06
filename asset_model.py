@@ -63,11 +63,11 @@ file_to_analyze = st.file_uploader("Choose a CSV or Excel file", type=["csv", "x
 
 def assign_machine(power_hour, asset_combinations, elco_df, tc_df):
     """Assigns a suitable machine based on power demand using a hierarchical approach."""
-
+    
     # Step 1: Try to meet power demand with a single ELCO machine
     suitable_single_elco = elco_df[elco_df['Size (kW)'] >= power_hour]
     if not suitable_single_elco.empty:
-        return suitable_single_elco.iloc[0]['Machine']  # Return the first ELCO that meets the demand as a string
+        return suitable_single_elco.iloc[0]['Machine']  # Return the first ELCO that meets the demand
 
     # Step 2: Try to meet power demand with a combination of multiple ELCO machines
     elco_combinations = []
@@ -81,17 +81,13 @@ def assign_machine(power_hour, asset_combinations, elco_df, tc_df):
     # If any combination of ELCOs meets the demand, return the smallest one
     if elco_combinations:
         smallest_combo = min(elco_combinations, key=lambda x: sum(machine[1] for machine in x))
-        combo_name = ' + '.join([machine[0] for machine in smallest_combo])  # Create a name for the combination
-        return combo_name  # Return the name of the combination for column naming
+        return ' + '.join([machine[0] for machine in smallest_combo])  # Return machine names in the smallest combination
 
     # Step 3: If no suitable ELCO combination, try combinations of ELCO + TC machines
     for asset in asset_combinations:
-        # Check that asset contains valid tuples (name, size)
-        if all(isinstance(machine, tuple) and len(machine) >= 2 for machine in asset):
-            total_power = sum(machine[1] for machine in asset)  # Calculate total power of the asset
-            if total_power >= power_hour:
-                combo_name = ' + '.join([machine[0] for machine in asset])  # Create a name for the combination
-                return combo_name  # Return the name of the combination
+        total_power = sum(machine[1] for machine in asset)  # Calculate total power of the asset
+        if total_power >= power_hour:
+            return ' + '.join([machine[0] for machine in asset])  # Return names of the machines in the combination
 
     return 'No suitable machine'  # If no suitable combination is found
 
@@ -240,23 +236,17 @@ if df is not None:
     
     # Step 6: Assign machines based on power data
     if hours_data_column in df.columns:
-    # Generate asset combinations
+    # Generate asset combinations again for assigning machines
         assets = generate_combinations(TC_df.values, ELCO_df.values)
-
-    # Initialize a new DataFrame to hold hours data
+        assigned_machines = df[hours_data_column].apply(lambda x: assign_machine(x, assets, ELCO_df, TC_df))
+    
+    # Create a new DataFrame to hold hours data and assigned machines
         df_v2 = df[[hours_data_column]].copy()  # Use .copy() to avoid SettingWithCopyWarning
-
-    # Loop through each asset combination to create a new column
-    for asset_combination in assets:
-        # Debugging: Print the asset_combination to understand its structure
-        print(f"Processing asset_combination: {asset_combination}")
-        
-        # Check if the asset can be assigned based on the hours
-        df_v2[f'asset_{str(asset_combination)}'] = df[hours_data_column].apply(lambda x: str(asset_combination) if assign_machine(x, asset_combination, ELCO_df, TC_df) else ''
-        )
-
+        df_v2['assigned_machine'] = assigned_machines  # Add the assigned machines to the new DataFrame
+    
     # Display the DataFrame with assigned machines
-    display_data_frame(df_v2, "Assigned Machine DataFrame")
+    display_data_frame(df_v2, "Assigned Machine DataFrame")  # Use df_v2 for display
+
 
 
 
