@@ -61,35 +61,39 @@ def display_data_frame(df, title):
 # File uploader for CSV or Excel files
 file_to_analyze = st.file_uploader("Choose a CSV or Excel file", type=["csv", "xls", "xlsx"])
 
-# Function to assign machines based on power demand
+# Function to assign machines based on power demand and asset combinations
 def assign_machine(power_hour, asset_combinations, elco_df, tc_df):
     """Assigns a suitable machine based on power demand using a hierarchical approach."""
+    
     # Step 1: Try to meet power demand with a single ELCO machine
     suitable_single_elco = elco_df[elco_df['Size (kW)'] >= power_hour]
     if not suitable_single_elco.empty:
-        return suitable_single_elco.iloc[0]['Machine']
+        return suitable_single_elco.iloc[0]['Machine']  # Return the first ELCO that meets the demand
 
     # Step 2: Try to meet power demand with a combination of multiple ELCO machines
     elco_combinations = []
     for r in range(1, len(elco_df) + 1):
+        # Generate all combinations of ELCOs up to the length of the available ELCOs
         for combo in itertools.combinations(elco_df.values, r):
             total_elco_power = sum(machine[1] for machine in combo)
             if total_elco_power >= power_hour:
                 elco_combinations.append(combo)
 
+    # If any combination of ELCOs meets the demand, return the smallest one
     if elco_combinations:
         smallest_combo = min(elco_combinations, key=lambda x: sum(machine[1] for machine in x))
-        return ' + '.join([machine[0] for machine in smallest_combo])
+        return ' + '.join([machine[0] for machine in smallest_combo])  # Return machine names in the smallest combination
 
     # Step 3: If no suitable ELCO combination, try combinations of ELCO + TC machines
     for asset in asset_combinations:
-        total_power = sum(machine[1] for machine in asset)
+        total_power = sum(machine[1] for machine in asset)  # Calculate total power of the asset
         if total_power >= power_hour:
-            return ' + '.join([machine[0] for machine in asset])
+            return ' + '.join([machine[0] for machine in asset])  # Return names of the machines in the combination
 
-    return 'No suitable machine'
+    return 'No suitable machine'  # If no suitable combination is found
 
-# File handling and initial DataFrame setup
+
+# File handling and initial dataframe setup
 df = None
 if file_to_analyze is not None:
     try:
@@ -118,9 +122,11 @@ if df is not None:
     TC_df, TC_carico_fisso_df = handle_machine_input_tc("TC", n_tc)
     ELCO_df = handle_machine_input("ELCO", n_elco)
 
+
+
     # Display the input DataFrames
     display_data_frame(TC_df, "TC DataFrame:")
-    display_data_frame(TC_carico_fisso_df, "TC Carico Fisso DataFrame:")
+    display_data_frame(TC_carico_fisso_df , "TC DataFrame:")
     display_data_frame(ELCO_df, "ELCO DataFrame:")
 
     # Step 3: Generate asset combinations (ELCO and TC)
@@ -190,16 +196,51 @@ if df is not None:
         num_merged_dfs = st.number_input("How many merged databases do you want to create?", min_value=1, max_value=len(dataframes))
         merged_dataframes = []
         
-        # Loop to merge DataFrames
-        for i in range(num_merged_dfs):
-            merged_dataframes.append(pd.concat(dataframes[:i + 1], axis=1))
+        # Loop through user input to merge DataFrames
+        for merge_idx in range(int(num_merged_dfs)):
+            st.write(f"### Merged Database {merge_idx + 1}")
+            selected_dfs = st.multiselect(f"Select DataFrames to merge for Merged Database {merge_idx + 1}",
+                                          options=range(len(dataframes)),
+                                          format_func=lambda x: f"Group {x + 1}")
 
-        # Display and download merged DataFrames
-        for i, merged_df in enumerate(merged_dataframes):
-            display_data_frame(merged_df, f"Merged DataFrame {i + 1}")
+            if selected_dfs:
+                dfs_to_merge = [dataframes[i] for i in selected_dfs]
+                merged_df = pd.concat(dfs_to_merge, ignore_index=True)
 
-            merged_csv = merged_df.to_csv(index=False)
-            st.download_button(label=f"Download Merged DataFrame {i + 1} CSV",
-                               data=merged_csv,
-                               file_name=f'merged_dataframe_{i + 1}.csv',
-                               mime='text/csv')
+                # Calculate 'Rapporto potenza assorbita/pot tot' if applicable
+                if merged_df.shape[1] >= 3:
+                    merged_df["Rapporto potenza assorbita/pot tot"] = merged_df.iloc[:, 1] / merged_df.iloc[:, 2]
+                    merged_df["Fuel/Rapporto potenza assorbita"] = (merged_df.iloc[:, 3] * 1000) / merged_df.iloc[:, 1]
+
+                    # Create classes for 'Rapporto potenza assorbita/pot tot'
+                    merged_df['Class'] = pd.cut(
+                        merged_df["Rapporto potenza assorbita/pot tot"] * 100,  # Convert to percentage
+                        bins=[0, 30, 50, 70, 100],  # Define the ranges
+                        labels=['0-30%', '30-50%', '50-70%', '70-100%'],  # Labels for the ranges
+                        include_lowest=True
+                    )
+
+                # Group by 'Class' and calculate the mean for each class
+                summary_df = merged_df.groupby('Class').agg(
+                    Lim_inf=('Rapporto potenza assorbita/pot tot', lambda x: x.min() * 100),  # Lower limit of the class
+                    Lim_sup=('Rapporto potenza assorbita/pot tot', lambda x: x.max() * 100),  # Upper limit of the class
+                    Rapporto_fuel=('Fuel/Rapporto potenza assorbita', 'mean')  # Mean fuel ratio
+                ).reset_index()  # Reset index for better display
+
+                # Display summary DataFrame
+                display_data_frame(summary_df, "Summary DataFrame")
+
+    # Step 6: Assign machines based on power data
+    if hours_data_column in df.columns:
+        # Generate asset combinations again for assigning machines
+        assets = generate_combinations(TC_df.values, ELCO_df.values)
+        assigned_machines = df[hours_data_column].apply(lambda x: assign_machine(x, assets, ELCO_df, TC_df))
+        df['assigned_machine'] = assigned_machines
+        display_data_frame(df, "Assigned Machine DataFrame")
+
+        # Option to download the DataFrame with assigned machines
+        assigned_machine_csv = df.to_csv(index=False)
+        st.download_button(label="Download Assigned Machine Data CSV",
+                           data=assigned_machine_csv,
+                           file_name='assigned_machines.csv',
+                           mime='text/csv')
