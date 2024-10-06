@@ -244,10 +244,10 @@ if df is not None:
     # Loop through each asset combination to create a new column
     for asset_combination in assets:
         # Debugging: Print the asset_combination to understand its structure
-    print(f"Processing asset_combination: {asset_combination}")
+        print(f"Processing asset_combination: {asset_combination}")
         
         # Check if the asset can be assigned based on the hours
-    df_v2[f'asset_{str(asset_combination)}'] = df[hours_data_column].apply(lambda x: str(asset_combination) if assign_machine(x, asset_combination, ELCO_df, TC_df) else ''
+        df_v2[f'asset_{str(asset_combination)}'] = df[hours_data_column].apply(lambda x: str(asset_combination) if assign_machine(x, asset_combination, ELCO_df, TC_df) else ''
         )
 
     # Display the DataFrame with assigned machines
