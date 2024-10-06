@@ -235,15 +235,20 @@ if df is not None:
     
     # Step 6: Assign machines based on power data
     if hours_data_column in df.columns:
+    # Generate asset combinations
         assets = generate_combinations(TC_df.values, ELCO_df.values)
-        assigned_machines = df[hours_data_column].apply(lambda x: assign_machine(x, assets, ELCO_df, TC_df))
     
-    # Create a new DataFrame to hold hours data and assigned machines
+    # Initialize a new DataFrame to hold hours data
         df_v2 = df[[hours_data_column]].copy()  # Use .copy() to avoid SettingWithCopyWarning
-        df_v2['assigned_machine'] = assigned_machines  # Add the assigned machines to the new DataFrame
+
+    # Loop through each asset combination to create a new column
+        for asset_combination in assets:
+        # Check if the asset can be assigned based on the hours
+            df_v2[f'asset_{asset_combination}'] = df[hours_data_column].apply(lambda x: asset_combination if assign_machine(x, asset_combination, ELCO_df, TC_df) else '')
     
     # Display the DataFrame with assigned machines
-        display_data_frame(df_v2, "Assigned Machine DataFrame")
+            display_data_frame(df_v2, "Assigned Machine DataFrame")
+
 
         
    #if hours_data_column in df.columns:
