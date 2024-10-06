@@ -61,7 +61,6 @@ def display_data_frame(df, title):
 # File uploader for CSV or Excel files
 file_to_analyze = st.file_uploader("Choose a CSV or Excel file", type=["csv", "xls", "xlsx"])
 
-# Function to assign machines based on power demand and asset combinations
 def assign_machine(power_hour, asset_combinations, elco_df, tc_df):
     """Assigns a suitable machine based on power demand using a hierarchical approach."""
     
@@ -86,11 +85,13 @@ def assign_machine(power_hour, asset_combinations, elco_df, tc_df):
 
     # Step 3: If no suitable ELCO combination, try combinations of ELCO + TC machines
     for asset in asset_combinations:
-        total_power = sum(machine[1] for machine in asset)  # Calculate total power of the asset
-        if total_power >= power_hour:
-            return ' + '.join([machine[0] for machine in asset])  # Return names of the machines in the combination
+        # Check that asset contains valid tuples (name, size)
+        if all(isinstance(machine, tuple) and len(machine) >= 2 for machine in asset):
+            total_power = sum(machine[1] for machine in asset)  # Calculate total power of the asset
+            if total_power >= power_hour:
+                return ' + '.join([machine[0] for machine in asset])  # Return names of the machines in the combination
 
-    return 'No suitable machine'  # If no suitable combination is found
+    return 'No suitable machine' 
 
 
 # File handling and initial dataframe setup
