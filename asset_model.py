@@ -193,42 +193,43 @@ if df is not None:
                 st.warning(f"Some columns in the group {group} do not exist in the DataFrame.")
 
     if dataframes:
-        num_merged_dfs = st.number_input("How many merged databases do you want to create?", min_value=1, max_value=len(dataframes))
-        merged_dataframes = []
-        
-        # Loop through user input to merge DataFrames
-        for merge_idx in range(int(num_merged_dfs)):
-            st.text_input(f"{machine_type} {i + 1} Name")
-            selected_dfs = st.multiselect(f"Select DataFrames to merge for Merged Database {merge_idx + 1}",
-                                          options=range(len(dataframes)),
-                                          format_func=lambda x: f"Group {x + 1}")
+    num_merged_dfs = st.number_input("How many merged databases do you want to create?", min_value=1, max_value=len(dataframes))
+    merged_dataframes = []
+    
+    # Loop through user input to merge DataFrames
+    for merge_idx in range(int(num_merged_dfs)):
+        st.write(f"### Merged Database {merge_idx + 1}")
+        selected_dfs = st.multiselect(f"Select DataFrames to merge for Merged Database {merge_idx + 1}",
+                                      options=range(len(dataframes)),
+                                      format_func=lambda x: f"Group {x + 1}")
 
-            if selected_dfs:
-                dfs_to_merge = [dataframes[i] for i in selected_dfs]
-                merged_df = pd.concat(dfs_to_merge, ignore_index=True)
+        if selected_dfs:
+            dfs_to_merge = [dataframes[i] for i in selected_dfs]
+            merged_df = pd.concat(dfs_to_merge, ignore_index=True)
 
-                # Calculate 'Rapporto potenza assorbita/pot tot' if applicable
-                if merged_df.shape[1] >= 3:
-                    merged_df["Rapporto potenza assorbita/pot tot"] = merged_df.iloc[:, 1] / merged_df.iloc[:, 2]
-                    merged_df["Fuel/Rapporto potenza assorbita"] = (merged_df.iloc[:, 3] * 1000) / merged_df.iloc[:, 1]
+            # Calculate 'Rapporto potenza assorbita/pot tot' if applicable
+            if merged_df.shape[1] >= 3:
+                merged_df["Rapporto potenza assorbita/pot tot"] = merged_df.iloc[:, 1] / merged_df.iloc[:, 2]
+                merged_df["Fuel/Rapporto potenza assorbita"] = (merged_df.iloc[:, 3] * 1000) / merged_df.iloc[:, 1]
 
-                    # Create classes for 'Rapporto potenza assorbita/pot tot'
-                    merged_df['Class'] = pd.cut(
-                        merged_df["Rapporto potenza assorbita/pot tot"] * 100,  # Convert to percentage
-                        bins=[0, 30, 50, 70, 100],  # Define the ranges
-                        labels=['0-30%', '30-50%', '50-70%', '70-100%'],  # Labels for the ranges
-                        include_lowest=True
-                    )
+                # Create classes for 'Rapporto potenza assorbita/pot tot'
+                merged_df['Class'] = pd.cut(
+                    merged_df["Rapporto potenza assorbita/pot tot"] * 100,  # Convert to percentage
+                    bins=[0, 30, 50, 70, 100],  # Define the ranges
+                    labels=['0-30%', '30-50%', '50-70%', '70-100%'],  # Labels for the ranges
+                    include_lowest=True
+                )
 
-                # Group by 'Class' and calculate the mean for each class
-                summary_df = merged_df.groupby('Class').agg(
-                    Lim_inf=('Rapporto potenza assorbita/pot tot', lambda x: x.min() * 100),  # Lower limit of the class
-                    Lim_sup=('Rapporto potenza assorbita/pot tot', lambda x: x.max() * 100),  # Upper limit of the class
-                    Rapporto_fuel=('Fuel/Rapporto potenza assorbita', 'mean')  # Mean fuel ratio
-                ).reset_index()  # Reset index for better display
+            # Group by 'Class' and calculate the mean for each class
+            summary_df = merged_df.groupby('Class').agg(
+                Lim_inf=('Rapporto potenza assorbita/pot tot', lambda x: x.min() * 100),  # Lower limit of the class
+                Lim_sup=('Rapporto potenza assorbita/pot tot', lambda x: x.max() * 100),  # Upper limit of the class
+                Rapporto_fuel=('Fuel/Rapporto potenza assorbita', 'mean')  # Mean fuel ratio
+            ).reset_index()  # Reset index for better display
 
-                # Display summary DataFrame
-                display_data_frame(summary_df, "Summary DataFrame")
+            # Display summary DataFrame
+            display_data_frame(summary_df, "Summary DataFrame")
+
     if 
     # Step 6: Assign machines based on power data
     if hours_data_column in df.columns:
