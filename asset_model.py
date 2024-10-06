@@ -239,7 +239,7 @@ if df is not None:
         assets = generate_combinations(TC_df.values, ELCO_df.values)
 
     # Initialize a new DataFrame to hold hours data
-    df_v2 = df[[hours_data_column]].copy()  # Use .copy() to avoid SettingWithCopyWarning
+        df_v2 = df[[hours_data_column]].copy()  # Use .copy() to avoid SettingWithCopyWarning
 
     # Loop through each asset combination to create a new column
     for asset_combination in assets:
