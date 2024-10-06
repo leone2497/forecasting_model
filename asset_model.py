@@ -89,7 +89,7 @@ def assign_machine(power_hour, asset_combinations, elco_df, tc_df):
         if total_power >= power_hour:
             return ' + '.join([machine[0] for machine in asset])  # Return names of the machines in the combination
 
-    return 'No suitable machine'  # If no suitable combination is found
+    return 'POWER STAITION OFF'  # If no suitable combination is found
 
 
 
