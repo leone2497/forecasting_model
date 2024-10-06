@@ -247,7 +247,7 @@ if df is not None:
             df_v2[f'asset_{asset_combination}'] = df[hours_data_column].apply(lambda x: asset_combination if assign_machine(x, asset_combination, ELCO_df, TC_df) else '')
     
     # Display the DataFrame with assigned machines
-            display_data_frame(df_v2, "Assigned Machine DataFrame")
+        display_data_frame(df_v2, "Assigned Machine DataFrame")
 
 
         
