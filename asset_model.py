@@ -193,11 +193,11 @@ if df is not None:
                 st.warning(f"Some columns in the group {group} do not exist in the DataFrame.")
 
     if dataframes:
-    num_merged_dfs = st.number_input("How many merged databases do you want to create?", min_value=1, max_value=len(dataframes))
-    merged_dataframes = []
+        num_merged_dfs = st.number_input("How many merged databases do you want to create?", min_value=1, max_value=len(dataframes))
+        merged_dataframes = []
     
     # Loop through user input to merge DataFrames
-    for merge_idx in range(int(num_merged_dfs)):
+        for merge_idx in range(int(num_merged_dfs)):
         st.write(f"### Merged Database {merge_idx + 1}")
         selected_dfs = st.multiselect(f"Select DataFrames to merge for Merged Database {merge_idx + 1}",
                                       options=range(len(dataframes)),
