@@ -198,7 +198,7 @@ if df is not None:
     
     # Loop through user input to merge DataFrames
     for merge_idx in range(int(num_merged_dfs)):
-        st.write(f"### Merged Database {merge_idx + 1}")
+        st.text_input(f"Name database:", value=col)
         selected_dfs = st.multiselect(f"Select DataFrames to merge for Merged Database {merge_idx + 1}",
                                       options=range(len(dataframes)),
                                       format_func=lambda x: f"Group {x + 1}")
