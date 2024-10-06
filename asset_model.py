@@ -61,13 +61,15 @@ def display_data_frame(df, title):
 # File uploader for CSV or Excel files
 file_to_analyze = st.file_uploader("Choose a CSV or Excel file", type=["csv", "xls", "xlsx"])
 
+import itertools
+
 def assign_machine(power_hour, asset_combinations, elco_df, tc_df):
     """Assigns a suitable machine based on power demand using a hierarchical approach."""
-    
+
     # Step 1: Try to meet power demand with a single ELCO machine
     suitable_single_elco = elco_df[elco_df['Size (kW)'] >= power_hour]
     if not suitable_single_elco.empty:
-        return suitable_single_elco.iloc[0]['Machine']  # Return the first ELCO that meets the demand
+        return suitable_single_elco.iloc[0]['Machine'], suitable_single_elco.iloc[0]['Machine']  # Return the first ELCO and its name
 
     # Step 2: Try to meet power demand with a combination of multiple ELCO machines
     elco_combinations = []
@@ -81,7 +83,8 @@ def assign_machine(power_hour, asset_combinations, elco_df, tc_df):
     # If any combination of ELCOs meets the demand, return the smallest one
     if elco_combinations:
         smallest_combo = min(elco_combinations, key=lambda x: sum(machine[1] for machine in x))
-        return ' + '.join([machine[0] for machine in smallest_combo])  # Return machine names in the smallest combination
+        combo_name = ' + '.join([machine[0] for machine in smallest_combo])  # Create a name for the combination
+        return combo_name, combo_name  # Return the name of the combination for column naming
 
     # Step 3: If no suitable ELCO combination, try combinations of ELCO + TC machines
     for asset in asset_combinations:
@@ -89,9 +92,11 @@ def assign_machine(power_hour, asset_combinations, elco_df, tc_df):
         if all(isinstance(machine, tuple) and len(machine) >= 2 for machine in asset):
             total_power = sum(machine[1] for machine in asset)  # Calculate total power of the asset
             if total_power >= power_hour:
-                return ' + '.join([machine[0] for machine in asset])  # Return names of the machines in the combination
+                combo_name = ' + '.join([machine[0] for machine in asset])  # Create a name for the combination
+                return combo_name, combo_name  # Return the name of the combination
 
-    return 'No suitable machine' 
+    return 'No suitable machine', None  # If no suitable combination is found
+
 
 
 # File handling and initial dataframe setup
