@@ -237,17 +237,22 @@ if df is not None:
     if hours_data_column in df.columns:
     # Generate asset combinations
         assets = generate_combinations(TC_df.values, ELCO_df.values)
-    
+
     # Initialize a new DataFrame to hold hours data
-        df_v2 = df[[hours_data_column]].copy()  # Use .copy() to avoid SettingWithCopyWarning
+    df_v2 = df[[hours_data_column]].copy()  # Use .copy() to avoid SettingWithCopyWarning
 
     # Loop through each asset combination to create a new column
-        for asset_combination in assets:
+    for asset_combination in assets:
+        # Debugging: Print the asset_combination to understand its structure
+    print(f"Processing asset_combination: {asset_combination}")
+        
         # Check if the asset can be assigned based on the hours
-            df_v2[f'asset_{asset_combination}'] = df[hours_data_column].apply(lambda x: asset_combination if assign_machine(x, asset_combination, ELCO_df, TC_df) else '')
-    
+    df_v2[f'asset_{str(asset_combination)}'] = df[hours_data_column].apply(lambda x: str(asset_combination) if assign_machine(x, asset_combination, ELCO_df, TC_df) else ''
+        )
+
     # Display the DataFrame with assigned machines
-        display_data_frame(df_v2, "Assigned Machine DataFrame")
+    display_data_frame(df_v2, "Assigned Machine DataFrame")
+
 
 
         
