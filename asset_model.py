@@ -198,7 +198,7 @@ if df is not None:
         
         # Loop through user input to merge DataFrames
         for merge_idx in range(int(num_merged_dfs)):
-            st.write(f"### Merged Database {merge_idx + 1}")
+            st.text_input(f"{machine_type} {i + 1} Name")
             selected_dfs = st.multiselect(f"Select DataFrames to merge for Merged Database {merge_idx + 1}",
                                           options=range(len(dataframes)),
                                           format_func=lambda x: f"Group {x + 1}")
@@ -229,7 +229,7 @@ if df is not None:
 
                 # Display summary DataFrame
                 display_data_frame(summary_df, "Summary DataFrame")
-
+    if 
     # Step 6: Assign machines based on power data
     if hours_data_column in df.columns:
         # Generate asset combinations again for assigning machines
