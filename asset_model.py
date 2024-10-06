@@ -230,7 +230,7 @@ if df is not None:
             # Display summary DataFrame
             display_data_frame(summary_df, "Summary DataFrame")
 
-    if 
+    
     # Step 6: Assign machines based on power data
     if hours_data_column in df.columns:
         # Generate asset combinations again for assigning machines
