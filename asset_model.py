@@ -10,19 +10,23 @@ def handle_machine_input_tc(machine_type, n):
     data = []
     data_carico_fisso = []
     for i in range(n):
-        col1, col2, col3, col4 = st.columns(4)
+        col1, col2, col3, col4, col5 = st.columns(5)
         with col1:
             name = st.text_input(f"{machine_type} {i + 1} Name")
         with col2:
             size = st.number_input(f"{machine_type} {i + 1} Size (kW)", min_value=0)
         with col3:
-            min_load = st.number_input(f"{machine_type} {i + 1} Min Technical Load (%)", min_value=0, max_value=100)
-            min_load = min_load / 100  # Convert to a fraction
+            min_load = st.number_input(f"{machine_type} {i + 1} Fixed Technical Load (%)", min_value=0, max_value=100)
+            min_load = fix_load / 100  # Convert to a fraction
         with col4:
             if size > 0:  # Check to avoid division by zero
-                Carico_fisso = size * min_load
+                Carico_fisso = size * fix_load
             else:
                 Carico_fisso = 0  # Set to 0 if size is not provided
+        with col5:
+            min_load = st.number_input(f"{machine_type} {i + 1} min Technical Load (%)", min_value=0, max_value=100)
+            min_load = min_load / 100
+            
 
         if name and size > 0:  # Ensure size is greater than 0
             data.append((name, size, min_load))
